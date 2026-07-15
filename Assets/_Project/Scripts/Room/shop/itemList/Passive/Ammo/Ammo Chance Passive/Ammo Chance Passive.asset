@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b230c1d355835451281ead5cf5017f53, type: 3}
+  m_Name: Ammo Chance Passive
+  m_EditorClassIdentifier: Assembly-CSharp::AmmoChancePassive
+  passiveName: AmmoChance
+  price: 100
+  detailtext: "\u5C04\u6483\u6642\u306B30%\u3067\u6B8B\u5F3E\uFF0B\uFF11"
+  icon: {fileID: 21300000, guid: 994575ca2de0440c4aa23f3b593c083e, type: 3}
+  model: {fileID: 3857545845724454934, guid: 6e77586ad5dd540e99330dc0495a22aa, type: 3}
+  canStack: 1
+  usecount: 0
+  remainCount: 0
+  running: 1
+  chance: 0.3

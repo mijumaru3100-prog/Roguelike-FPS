@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66194332893df4296a68c73ffaab366f, type: 3}
+  m_Name: Double Barrel
+  m_EditorClassIdentifier: Assembly-CSharp::DoubleBarrel
+  baseOpenTime: 0.4
+  baseDropTime: 0.8
+  baseInsertTime: 1
+  baseDropToInsertTime: 0.1
+  baseBoltMoveTime: 0.5
+  OpenAngle: {x: 0, y: 0, z: -45}
+  dropDistance: {x: -4, y: 0, z: 0}
+  spawnPoint: {x: 0, y: 0, z: -0.5}
+  shakeStrength: 0
+  handMagazinePoint: {x: -0.0255, y: 0.3, z: 0}
+  tekubiHandMagazineRotation: {x: 0, y: 0, z: 0}
+  ReloadTekubiRot: {x: 0, y: 0, z: 0}
+  magOpenClip: {fileID: 8300000, guid: 9617e53ce71e540af834f46d6ee39f35, type: 3}
+  magDropClip: {fileID: 8300000, guid: 4ab3caa18acfb47b09c99da9b4206efb, type: 3}
+  magInsertClip: {fileID: 8300000, guid: 4ab3caa18acfb47b09c99da9b4206efb, type: 3}
+  magCloseClip: {fileID: 8300000, guid: 9617e53ce71e540af834f46d6ee39f35, type: 3}
+  CloseSoundDelay: 0.3

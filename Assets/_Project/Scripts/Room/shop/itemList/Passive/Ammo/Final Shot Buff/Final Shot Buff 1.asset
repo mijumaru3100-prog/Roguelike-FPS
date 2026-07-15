@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8362ffce25af14b4d96ba563198ca659, type: 3}
+  m_Name: Final Shot Buff 1
+  m_EditorClassIdentifier: Assembly-CSharp::FinalShotBuff
+  passiveName: Final_Shot_Buff_2
+  price: 25
+  detailtext: "\u30DE\u30AC\u30B8\u30F3\u306E\u6700\u7D42\u5F3E\u306E\u5F31\u70B9\u30C0\u30E1\u30FC\u30B8100%\u4E0A\u6607"
+  icon: {fileID: 21300000, guid: f689decb9739a40ec95e3911cefc38f6, type: 3}
+  model: {fileID: 8542146956588780301, guid: db088fce3c4b84801a9fdc64c016cb73, type: 3}
+  canStack: 0
+  usecount: 0
+  remainCount: 0
+  running: 1
+  DamageMultipleBuff: 0
+  WeakBonusBuff: 1

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebae7dd219f624313998995267009bdb, type: 3}
+  m_Name: Particle Charge
+  m_EditorClassIdentifier: Assembly-CSharp::ParticleCharge
+  originalTiltTime: 1
+  originalChargeTime: 3.5
+  tiltAngle: {x: -15, y: 0, z: 0}
+  ChargeClip: {fileID: 8300000, guid: 9ddd74d7dbb8643ec841c04e9c5c92ba, type: 3}

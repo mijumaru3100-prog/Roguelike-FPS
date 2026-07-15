@@ -1,0 +1,85 @@
+using UnityEngine;
+
+[CreateAssetMenu(menuName = "Passives/OOOOStyle/#SCRIPTNAME#")]
+public class #SCRIPTNAME#: PassiveEffect
+{
+    //playerHP
+    //currentWeapon
+    //manager.BuffFlug.
+
+    //[SerializeField] private float buffDuration = 1.5f;
+    //public PlayerStats buffStats;
+
+    //manager.sharedStats.ApplyModifier(Stats, true)
+
+    //親で宣言済み//  
+    //public int remainCount;
+    //public bool running = true;   
+
+    // ステータス倍率 //(GunBase)
+    //public override float GetFireRateMultiplier(PlayerManager manager) => 0;    
+    //public override float GetDamageMultiplier(PlayerManager manager) => 0;
+    //public override float GetWeakPointBonus(PlayerManager manager) => 0; 
+    //public override float GetReloadSpeedMultiplier(PlayerManager manager) => 0; 
+     
+
+    // パッシブ取得 //(Pmanager)
+    //public override void OnGetThisPassive(PlayerManager manager) 
+    //{
+        //running = false;
+        //remainCounts = 0;
+    //}
+    //public override void OnGetPassive(PlayerManager manager) { }
+
+    // 更新 //(Pmanager)
+    //public override void OnUpdate(PlayerManager manager) { }
+    //public override void OnFixedUpdate(PlayerManager manager) { }
+
+    // 移動 //(Pmanager)
+    //public override void OnStopping(PlayerManager manager) { }
+    //public override void OnMoving(PlayerManager manager) { }
+
+    // 敵関連 //(Pmanager)
+    //public override void OnEnemyNear(PlayerManager manager) { }
+    //public override void OnEnemyAway(PlayerManager manager) { }
+    //public override void OnKillEnemy(PlayerManager manager) { }
+    //public override void OnBeforeTakeDamage(PlayerManager manager) { }
+    //public override void OnTakeDamage(PlayerManager manager, float damage, EnemyHP enemyHP) { }
+
+    // 射撃 //(GunBase)
+    //public override void OnHitBullet(PlayerManager manager, float damage, EnemyHP enemyHP) {}
+    //public override void OnBeforeShot(PlayerManager manager) { }
+    //public override void OnShotComplete(PlayerManager manager) { }
+    //public override void OnMiss(PlayerManager manager) { }
+
+
+    // リロード //(GunBase)
+    //public override void OnReloadComplete(PlayerManager manager) { }
+    //public override void OnBeforeReload(PlayerManager manager) { }
+
+    // 被弾・回復 //(PlayerHP)
+    //public override void OnGetDamage(PlayerManager manager) { }
+    //public override void OnHeal(PlayerManager manager) { }
+
+
+    // 戦闘開始 //
+    //public override void OnBattleStart(PlayerManager manager) { }
+    //public override void OnBattleClear(PlayerManager manager) { }
+
+    // ボス //(未実装)
+    // public override void OnBossStart(PlayerManager manager) { }
+    // public override void OnBossEnd(PlayerManager manager) { }
+
+    // ADS //
+    //public override void OnADSStart(PlayerManager manager) { }
+    //public override void OnADSEnd(PlayerManager manager) { }
+
+    // ジャンプ //
+    //public override void OnJump(PlayerManager manager) { }
+
+
+    // ショップ //(未実装)
+    // public override void OnShopEnter(PlayerManager manager) { }
+    // public override void OnShopBuy(PlayerManager manager) { }
+    // public override void OnShopExit(PlayerManager manager) { }
+}
