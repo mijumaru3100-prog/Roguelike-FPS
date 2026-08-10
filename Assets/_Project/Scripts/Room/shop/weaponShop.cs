@@ -20,14 +20,16 @@ public class weaponshop : MonoBehaviour
     [Header("Options")]
     public Transform modelSpawnPos;
     public bool spin = false;
-    public float spinSpeed = 100f; // 回転速度を少し速く調整
+    public float spinSpeed = 100f;
     
     private bool used = false;
     private bool isInside = false;
 
     void Start()
     {
-        ShopSetting();
+        PlayerBuyText = manager.PlayerBuyText;
+        buyTextData = manager.buyTextData;
+                ShopSetting();
     }
 
     void Update()
@@ -45,12 +47,10 @@ public class weaponshop : MonoBehaviour
 
     public void ShopSetting()
     {
-        // 1. ショップのリセット
         used = false;
         if (barrier != null) barrier.SetActive(true);
         if (model != null) Destroy(model);
 
-        // 2. アイテムの設定
         selected = itempool.GetRandom(manager);
         if (selected == null) return;
 
@@ -58,13 +58,11 @@ public class weaponshop : MonoBehaviour
         priceText.text = selected.price.ToString();
         detailText.text = selected.detailtext;
 
-        // 3. モデルの生成
         Transform parent = (modelSpawnPos != null) ? modelSpawnPos : transform;
         model = Instantiate(selected.model, parent);
         model.transform.localPosition = Vector3.zero;
         model.transform.localRotation = Quaternion.identity;
 
-        // 4. プレイヤーが範囲内にいる場合のテキスト更新
         if (isInside)
         {
             UpdateBuyText();

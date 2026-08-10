@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23951121aaaea44609b0b5e87b5a778c, type: 3}
+  m_Name: One Kill Next Buff 1
+  m_EditorClassIdentifier: Assembly-CSharp::OneKillNextBuff
+  passiveName: "\u6700\u9069\u5316\u30DE\u30AC\u30B8\u30F3"
+  price: 45
+  detailtext: "\u4F53\u529B\u6E80\u30BF\u30F3\u306E\u6575\u3092\u30AD\u30EB\u3059\u308B\u3068\u3001\u6B21\u306E\u5C04\u6483\u307E\u3067\u30EA\u30ED\u30FC\u30C9\u901F\u5EA625%\u4E0A\u6607"
+  icon: {fileID: 21300000, guid: 7be6c8bee94944f37ac6ab60b5ca1edf, type: 3}
+  model: {fileID: 8468308959964266040, guid: 02f56a2e6eaea4e4b89757511dbd5d02, type: 3}
+  canStack: 0
+  usecount: 0
+  remainCount: 0
+  running: 0
+  buffStats: {fileID: 0}

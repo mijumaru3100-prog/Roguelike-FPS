@@ -8,9 +8,7 @@ public class WeaponBobbing : MonoBehaviour
     [SerializeField] private PlayerManager pManager;
     [Header("歩行時の揺れの設定")]
     public float walkingBobbingSpeed = 10f; 
-    public float bobbingAmount = 0.05f;     
-    public float sideBobbingAmount = 0.03f; 
-    public float BackwardOffset = 0.1f;
+
     [Header("ADS時の揺れの設定")]
     public float adsMultiple_v = 0.3f;
     public float adsMultiple_h = 0.3f;
@@ -19,8 +17,7 @@ public class WeaponBobbing : MonoBehaviour
     public float tiltSmooth = 8f;
     [Header("ジャンプ")]
      public float jumpBobbingMultiple =  1f;
-    [Header("Sway")]
-    public float swaySmooth = 10f;
+
     [Header("停止慣性")]
     public float stopKickAmount = 0.015f;
     

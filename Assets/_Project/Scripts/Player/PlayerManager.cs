@@ -12,7 +12,7 @@ public class PlayerManager : MonoBehaviour
     
     public GunBase currentWeapon;
     public Transform weaponHolder;
-    public int money = 0;
+    private int money = 0;
     [SerializeField] private float countDuration = 0.5f; 
     private float displayMoney = 0; 
     private Coroutine countCoroutine;
@@ -21,6 +21,8 @@ public class PlayerManager : MonoBehaviour
     public List<PassiveEffect> activePassives = new List<PassiveEffect>();
     public BuffFlug BuffFlug;
     public PlayerStats sharedStats;
+    public GameObject PlayerBuyText;
+    public TextMeshProUGUI buyTextData;
     public TextMeshProUGUI ammoTextUI;
     public AmmoBeltUI ammoBeltUI;
     public Color DefaultTextColor;  
@@ -32,6 +34,7 @@ public class PlayerManager : MonoBehaviour
     public Transform recoilPivot;
     public CrosshairController crosshair;
     public DungeonManager dungeonManager;
+    public PassiveUIManager passiveUIManager;
 
     public Move playerMove;
     private bool wasMoving = false;
@@ -59,7 +62,6 @@ public class PlayerManager : MonoBehaviour
 
     void Awake()
     {
-        // ScriptableObjectの意図しない上書きを防ぐため、ゲーム開始時にステータスを初期化
         if (sharedStats != null)
         {
             sharedStats.ResetToDefault();
@@ -122,12 +124,12 @@ public class PlayerManager : MonoBehaviour
             {
                 if (isCurrentlyMoving)
                 {
-                    foreach (var p in activePassives) p.OnMoving(this);
+                    foreach (var p in activePassives.ToArray()) p.OnMoving(this);
                     startStopTime = Time.time;
                 }
                 else
                 {
-                    foreach (var p in activePassives) p.OnStopping(this);
+                    foreach (var p in activePassives.ToArray()) p.OnStopping(this);
                     startStopTime = 0f;
                 }    
                 wasMoving = isCurrentlyMoving;
@@ -141,7 +143,7 @@ public class PlayerManager : MonoBehaviour
             UpdateProximityStatus();
         }
 
-        foreach (var p in activePassives)
+        foreach (var p in activePassives.ToArray())
         {
             p.OnUpdate(this);
         }
@@ -149,7 +151,7 @@ public class PlayerManager : MonoBehaviour
 
     void FixedUpdate() 
     {
-        foreach (var p in activePassives)
+        foreach (var p in activePassives.ToArray())
         {
             p.OnFixedUpdate(this);
         }
@@ -176,12 +178,12 @@ public class PlayerManager : MonoBehaviour
             isEnemyNear = currentlyNear;
             if (isEnemyNear)
             {
-                foreach (var p in activePassives) p.OnEnemyNear(this);
+                foreach (var p in activePassives.ToArray()) p.OnEnemyNear(this);
                 Debug.Log("<color=orange>[Proximity] 敵が接近しました。</color>");
             }
             else
             {
-                foreach (var p in activePassives) p.OnEnemyAway(this);
+                foreach (var p in activePassives.ToArray()) p.OnEnemyAway(this);
                 Debug.Log("<color=cyan>[Proximity] 敵が離れました。</color>");
             }
         }
@@ -203,7 +205,6 @@ public class PlayerManager : MonoBehaviour
 
         newPassive.OnGetThisPassive(this);
 
-        // すでに立ち止まっている状態なら、追加した瞬間に OnStopping を適用する
         if (playerMove != null && !playerMove.isMoving)
         {
             newPassive.OnStopping(this);
@@ -213,6 +214,9 @@ public class PlayerManager : MonoBehaviour
         {
             p.OnGetPassive(this);
         }
+
+        if (passiveUIManager != null) passiveUIManager.RefreshUI();
+
         Debug.Log($"{newPassive.passiveName} を追加しました。");
     }
 
@@ -220,12 +224,13 @@ public class PlayerManager : MonoBehaviour
     {
         if (activePassives.Contains(p))
         {
-            // 外す前に、もし立ち止まっていて効果が適用中なら、解除（OnMoving相当）させる
             if (playerMove != null && !playerMove.isMoving)
             {
                 p.OnMoving(this); 
             }
             activePassives.Remove(p);
+            if (passiveUIManager != null) passiveUIManager.RefreshUI();
+            
             Debug.Log($"{p.passiveName} を削除しました。");
         }
     }
@@ -236,7 +241,6 @@ public class PlayerManager : MonoBehaviour
 
         money += amount;
         
-        // すでにカウント中なら一度止めて、新しい目標値へリスタート
         if (countCoroutine != null) StopCoroutine(countCoroutine);
         countCoroutine = StartCoroutine(MoneyCountAnimation());
     }
@@ -258,30 +262,22 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    // 時間ベースで滑らかに数字を追いつかせるコルーチン
     private IEnumerator MoneyCountAnimation()
     {
-        // 現在の表示金額から、実際の所持金（money）までの差分を計算
         float startMoney = displayMoney;
         float targetMoney = money;
         
-        // 差分がある間はループ
         while (!Mathf.Approximately(displayMoney, targetMoney))
         {
-            // 1秒あたりの変化量を計算（(目標までの総距離) ÷ 設定時間）
             float speed = Mathf.Abs(targetMoney - startMoney) / countDuration;
 
-            // displayMoney を targetMoney に向けて一定速度で近づける
             displayMoney = Mathf.MoveTowards(displayMoney, targetMoney, speed * Time.deltaTime);
 
-            // 画面のテキストを更新（整数にキャストして表示）
             moneyTextUI.text = $"{(int)displayMoney:00,000}";
 
-            // 1フレーム待つ（これによってフリーズを防ぎ、ヌルヌル動く）
             yield return null; 
         }
 
-        // 最後に完全に値を一致させる
         displayMoney = targetMoney;
         moneyTextUI.text = $"{(int)displayMoney:00,000}";
         countCoroutine = null;

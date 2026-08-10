@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce7430fb4b8649f9a4b6bedefe09e1e, type: 3}
   m_Name: Kill To Ammo
   m_EditorClassIdentifier: Assembly-CSharp::KillToAmmo
-  passiveName: Kill_To_Ammo
+  passiveName: "\u9032\u6483\u306E\u77F3\u7891"
   price: 50
-  detailtext: "\u30AD\u30EB\u3059\u308B\u3068\u6B8B\u5F3E+3"
+  detailtext: "\u30AD\u30EB\u3059\u308B\u3068\u6B8B\u5F3E+1"
   icon: {fileID: 21300000, guid: 9890fb60c721b4949a53c79874568ffd, type: 3}
   model: {fileID: 5545684670253716671, guid: d1ef9e101034c49c8bf98393a4eeb799, type: 3}
   canStack: 0
   usecount: 0
   remainCount: 0
   running: 1
-  resurveAmmo: 3
+  resurveAmmo: 1

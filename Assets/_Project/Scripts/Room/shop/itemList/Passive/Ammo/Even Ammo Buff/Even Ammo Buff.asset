@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e74d89520997e4c2fa1598231313d6e2, type: 3}
   m_Name: Even Ammo Buff
   m_EditorClassIdentifier: Assembly-CSharp::EvenAmmoBuff
-  passiveName: Even Ammo Buff-D
+  passiveName: "\u87BA\u65CB\u30DE\u30BA\u30EB"
   price: 100
   detailtext: "\u6B8B\u5F3E\u304C\u5076\u6570\u306E\u6642\u3001\u30C0\u30E1\u30FC\u30B8+10%"
   icon: {fileID: 21300000, guid: ac146f45f7434424096ae1dbc990a067, type: 3}

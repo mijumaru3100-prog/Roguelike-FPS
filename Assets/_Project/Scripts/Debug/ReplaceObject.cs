@@ -24,21 +24,18 @@ public class ReplaceObjects : EditorWindow
                 return;
             }
 
-            // ヒエラルキーで選択中のオブジェクトを取得
             GameObject[] selectedObjects = Selection.gameObjects;
 
             Undo.RegisterCompleteObjectUndo(selectedObjects, "Replace Objects");
 
             foreach (GameObject go in selectedObjects)
             {
-                // 新しいプレハブを生成
                 GameObject newGo = (GameObject)PrefabUtility.InstantiatePrefab(newPrefab);
                 newGo.transform.SetParent(go.transform.parent);
                 newGo.transform.position = go.transform.position;
                 newGo.transform.rotation = go.transform.rotation;
                 newGo.transform.localScale = go.transform.localScale;
 
-                // 元のオブジェクトを削除（Undo可能にするため一時記録）
                 Undo.RegisterCreatedObjectUndo(newGo, "Replace Objects");
                 Undo.DestroyObjectImmediate(go);
             }

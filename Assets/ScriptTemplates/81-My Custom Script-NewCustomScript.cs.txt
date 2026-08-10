@@ -3,18 +3,32 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Passives/OOOOStyle/#SCRIPTNAME#")]
 public class #SCRIPTNAME#: PassiveEffect
 {
-    //playerHP
-    //currentWeapon
+    //manager.playerHP.currentHP
+    //manager.playerHP.maxHP
+    //manager.playerHP.Heal(HealAmount);
+    //enemyHP.maxHP
+    //enemyHP.CurrentHP
+    //manager.currentWeapon
+    //manager.money
+    //manager.AddMoney(amount)
     //manager.BuffFlug.
+    //manager.RemovePassive(this);
 
-    //[SerializeField] private float buffDuration = 1.5f;
+   
     //public PlayerStats buffStats;
-
-    //manager.sharedStats.ApplyModifier(Stats, true)
+    //manager.sharedStats.ApplyModifier(buffStats, true)
+    //[SerializeField] private float buffDuration = 1.5f;
 
     //親で宣言済み//  
     //public int remainCount;
     //public bool running = true;   
+
+    //using System.Collections;
+    //manager.StartCoroutine(wait());
+    //IEnumerator wait()
+    //{
+        //yield return new WaitForSeconds(buffDuration);
+    //}
 
     // ステータス倍率 //(GunBase)
     //public override float GetFireRateMultiplier(PlayerManager manager) => 0;    
@@ -59,7 +73,7 @@ public class #SCRIPTNAME#: PassiveEffect
 
     // 被弾・回復 //(PlayerHP)
     //public override void OnGetDamage(PlayerManager manager) { }
-    //public override void OnHeal(PlayerManager manager) { }
+    //public override void OnHeal(PlayerManager manager,int amount,PlayerHP HP) { }
 
 
     // 戦闘開始 //

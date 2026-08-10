@@ -5,17 +5,14 @@ using System.Collections;
 [CreateAssetMenu(menuName = "Gun/Action/reserveShot")]
 public class reserveShot : shotAction
 { 
-    // gunbase_saigenのfireから呼び出される、よ
     public override void shot(GunBase baseGun)
     {
         Camera cam = baseGun.playerCamera;
         
-        // 1. スタート地点を「銃口」にする。もし未設定ならカメラから。
         Vector3 startPos = baseGun.muzzlePoint != null 
                            ? baseGun.muzzlePoint.position 
                            : cam.transform.position;
 
-        // 2. 狙い（レティクル）の先を計算
         Ray ray = cam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
         Vector3 endPos;
 
@@ -31,8 +28,14 @@ public class reserveShot : shotAction
             {
                 targetHealth.OnHitBullet(baseGun.damage, hit.collider); 
                 baseGun.pManager.crosshair.OnHit();
-                baseGun.currentAmmo++;
+
+                baseGun.AddAmmoAnimated(1, 0.1f);
+                
                 baseGun.StartCoroutine(ReserveAmmoRoutine(baseGun));
+            }
+            else
+            {
+                MakeHitMark(baseGun.pManager, hit, ray.direction);
             }
         }
         else
@@ -46,15 +49,12 @@ public class reserveShot : shotAction
 
         if (baseGun.pManager.tracerPool != null)
         {
-            // 3. 生成して、向きを着弾点へ向ける
-            GameObject t = baseGun.pManager.tracerPool.Get(); // 借りる
-            t.transform.position = Vector3.zero; // 初期化が必要な場合はここで
+            GameObject t = baseGun.pManager.tracerPool.Get();
+            t.transform.position = Vector3.zero;
             LineRenderer lr = t.GetComponent<LineRenderer>();
             
-
             if (lr != null)
             {
-                // カメラの方を向くように設定（これで回転の違和感が消えるはず）
                 lr.alignment = LineAlignment.View;
 
                 lr.startWidth = 0.1f;
@@ -76,11 +76,9 @@ public class reserveShot : shotAction
     }
     private IEnumerator ReserveAmmoRoutine(GunBase baseGun)
     {
-        // baseGun.fireRate秒 待つ
         yield return new WaitForSeconds(baseGun.fireRate);
 
-        // 待機後に表示を更新
-        if (baseGun != null) // 待っている間に武器が破棄された場合の安全対策
+        if (baseGun != null)
         {
             baseGun.UpdateAmmoDisplay();
         }

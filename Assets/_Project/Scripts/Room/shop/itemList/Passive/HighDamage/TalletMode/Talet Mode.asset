@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b163a38053f34dd487edb6143ce22ed, type: 3}
+  m_Name: Talet Mode
+  m_EditorClassIdentifier: Assembly-CSharp::TaletMode
+  passiveName: "\u65B0\u578B\u30D0\u30A4\u30DD\u30C3\u30C9"
+  price: 50
+  detailtext: "\u7ACB\u3061\u6B62\u307E\u308B\u3068\u6BCE\u79D2\u3054\u3068\u306B\u30C0\u30E1\u30FC\u30B8\uFF11\uFF15%\u4E0A\u6607"
+  icon: {fileID: 21300000, guid: 7a688a2e0434c48a5a8540c141453a1e, type: 3}
+  model: {fileID: 5808416616184021108, guid: c97f8fc5e0eb14e359b57fe7084da2b9, type: 3}
+  canStack: 0
+  usecount: 1
+  remainCount: 0
+  running: 1
+  buffCoolTime: 1
+  buffStats: {fileID: 11400000, guid: 8a867a5d55f2b4251afbfa99b7414e7e, type: 2}
+  maxCount: 5
+  isAdditive: 0

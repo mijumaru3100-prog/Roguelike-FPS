@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Passives/OOOOStyle/NoMiss_HeadShot")]
+[CreateAssetMenu(menuName = "Passives/HighDamageStyle/NoMiss_HeadShot")]
 public class NoMiss_HeadShot: PassiveEffect
 {
     public int MaxBuffCount;

@@ -22,14 +22,12 @@ public class DoubleBarrel : reloadAnimation
 
      public Vector3 ReloadTekubiRot;
 
-        
     public AudioClip magOpenClip; 
      public AudioClip magDropClip;    
     public AudioClip magInsertClip;         
     public AudioClip magCloseClip; 
     public float CloseSoundDelay = 0.1f;
    
-
     public override void Play(GunBase gun)
     {
         float speedMult = gun.GetTotalReloadSpeedMultiplier();
@@ -39,22 +37,18 @@ public class DoubleBarrel : reloadAnimation
         float insertTime = baseInsertTime / speedMult;
         float dropToInsertTime = baseDropToInsertTime / speedMult;
        
-
         Vector3 defaultGunRot = gun.gunTiltModel.transform.localEulerAngles;
         Vector3 defaultArmPosition = gun.MoveArm.transform.localPosition;
         Vector3 defaultTekubiRot = gun.MoveTekubi.transform.localEulerAngles;
         Vector3 defaultMagazinePoint = gun.magazineObject.transform.localPosition;
      
-
         Sequence seq = DOTween.Sequence();
 
-        // 1. 銃を傾け、手をマガジンへ
         seq.AppendCallback(() => {
             gun.PlayReloadSound(magOpenClip);    
         });
         seq.Append(gun.gunTiltModel.transform.DOLocalRotate(OpenAngle, OpenTime));
 
-        // 2. マガジンを抜く処理
         seq.AppendCallback(() => { 
             gun.OnMagazineEjected();
             gun.PlayReloadSound(magDropClip);    
@@ -62,8 +56,6 @@ public class DoubleBarrel : reloadAnimation
         seq.Append(gun.magazineObject.transform.DOLocalMove(dropDistance,dropTime));
         seq.Join(gun.MoveArm.transform.DOLocalMove(spawnPoint,dropTime));
 
-
-        // 3~4. マガジン移動
         seq.AppendCallback(() => {
             gun.magazineObject.transform.position = defaultMagazinePoint;
         });
@@ -80,7 +72,6 @@ public class DoubleBarrel : reloadAnimation
             }); 
         });
 
-        // 5. 銃の角度と手の位置を初期位置に戻す
         seq.Append(gun.gunTiltModel.transform.DOLocalRotate(defaultGunRot, OpenTime));
         seq.Join(gun.MoveTekubi.transform.DOLocalRotate(defaultTekubiRot, OpenTime));
         seq.Join(gun.MoveArm.transform.DOLocalMove(defaultArmPosition, OpenTime));

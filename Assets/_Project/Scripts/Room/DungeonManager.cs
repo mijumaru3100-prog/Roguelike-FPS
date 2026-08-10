@@ -27,19 +27,16 @@ public class DungeonManager : MonoBehaviour
         boss
     }
 
-    // DungeonManager.cs 内に追加・修正
 public roomType GetNextRoomType()
 {
     int nextFloor = currentFloor + 1;
 
-    // もしボス階ならボスタイプを返す
     if (nextFloor >= bossFloor)
     {
         return roomType.boss;
     }
 
-    // ボス階でなければランダムに選ぶ（ボス以外のタイプから）
-    roomType[] randomTypes = { roomType.battle, roomType.elite, roomType.shop, roomType.treasure };
+    roomType[] randomTypes = { roomType.battle, roomType.elite, roomType.shop };
     return randomTypes[Random.Range(0, randomTypes.Length)];
 }
 

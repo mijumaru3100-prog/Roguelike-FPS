@@ -24,10 +24,8 @@ public class Coin : MonoBehaviour
     {
         if (playerTransform == null) return;
 
-        // 速度を徐々に上げる
         moveSpeed += acceleration * Time.deltaTime;
 
-        
         transform.position = Vector3.MoveTowards(
             transform.position, 
             playerTransform.position, 

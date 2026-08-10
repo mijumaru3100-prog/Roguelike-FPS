@@ -43,6 +43,9 @@ public List<ElevatorDoor> Exitdoors;
     private Transform playerTransform;
     private Vector3 initialLocalPlayerPos;
     private GameObject ridingPlayer;
+
+    public bool DontRoomTypeChange =false;
+
     void Update()
     {
         if (isGoing && ridingPlayer != null)
@@ -80,6 +83,9 @@ public List<ElevatorDoor> Exitdoors;
         {
             nextStage = nextRoom.GetComponent<Stage>();
         }
+        nextStage.ResetStage();
+        nextStage.StartStage();
+
         player.transform.SetParent(transform);
         ridingPlayer = player;
         initialLocalPlayerPos = player.transform.localPosition;
@@ -141,8 +147,6 @@ public List<ElevatorDoor> Exitdoors;
 
             dungeonManager.AdvanceFloor();
             dungeonManager.FloorCount.CountUpdate();
-            nextStage.ResetStage();
-            nextStage.StartStage();
         });
     }
     public void EnterDoors_OpenDoors() { foreach(var door in Enterdoors) door.Open(); }
@@ -170,13 +174,12 @@ public List<ElevatorDoor> Exitdoors;
         ExitDoors_CloseDoors();
         EnterDoors_OpenDoors();
         
-        // 【修正】DungeonManagerに「次のタイプ」を聞く
-        nextRoomType = dungeonManager.GetNextRoomType();
-        
-        // そのタイプで部屋を取得
+        if(!DontRoomTypeChange)
+        {
+            nextRoomType = dungeonManager.GetNextRoomType();
+        }
         nextRoom = dungeonManager.SelectRoom(nextRoomType);
-        if (nextRoom != null)
-            nextStage = nextRoom.GetComponent<Stage>();
+        if (nextRoom != null) nextStage = nextRoom.GetComponent<Stage>();
             
         EffectChange();
 

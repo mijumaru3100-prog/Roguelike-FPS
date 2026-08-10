@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d80e799f8ed248049c048ba9330b4b9, type: 3}
+  m_Name: Delicate Buff
+  m_EditorClassIdentifier: Assembly-CSharp::DelicateBuff
+  passiveName: "\u4E0D\u5B89\u5B9A\u306A\u30B3\u30A2"
+  price: 100
+  detailtext: "\u4E0E\u30C0\u30E1\u30FC\u30B8100%\u4E0A\u6607\u3002\u88AB\u5F3E\u3059\u308B\u3068\u3053\u306E\u30D1\u30C3\u30B7\u30D6\u30A2\u30A4\u30C6\u30E0\u306F\u6D88\u3048\u308B"
+  icon: {fileID: 21300000, guid: 0201dc676893e472ab5899b776cde804, type: 3}
+  model: {fileID: 1028501140092739814, guid: fa9592e3c9b664313932629c93af364f, type: 3}
+  canStack: 0
+  usecount: 0
+  remainCount: 1
+  running: 1
+  buffStats: {fileID: 11400000, guid: 91b18721502d243c3b29df84a091af9a, type: 2}
+  defaultCount: 1

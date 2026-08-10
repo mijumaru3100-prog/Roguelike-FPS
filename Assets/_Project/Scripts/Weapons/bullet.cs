@@ -8,7 +8,7 @@ public class bullet : MonoBehaviour
    public float lifeTime;
     public int baseThrouthCount = 1;
     public int currentThrouthCount;
-    public float damage = 1;
+    public int damage = 1;
     public PlayerManager pManager;
     void OnEnable()
     {
@@ -46,7 +46,6 @@ public class bullet : MonoBehaviour
         //if (EnemyHealth != null)
         //{
         //    EnemyHealth.OnHitBullet(damage, other); 
-        //    Hphit++;
         //    if(pManager != null && pManager.crosshair != null) pManager.crosshair.OnHit();
         //}
         if (PlayerHealth != null)

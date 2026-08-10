@@ -19,6 +19,9 @@ public class ShopRoom : Stage
 
     public void ResetShops()
     {
+        base.ResetStage();
+        base.StartStage();
+
         foreach(var shop in StatsShops)
         {
             if(shop != null) shop.ShopSetting();

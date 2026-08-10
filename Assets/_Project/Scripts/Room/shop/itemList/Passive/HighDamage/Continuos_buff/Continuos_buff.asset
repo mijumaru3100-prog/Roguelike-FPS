@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01e2b4d92490943c98fc4713d93bf34b, type: 3}
+  m_Name: Continuos_buff
+  m_EditorClassIdentifier: Assembly-CSharp::continuos_buff
+  passiveName: "\u6575\u8FFD\u8DE1\u30AB\u30E1\u30E9"
+  price: 50
+  detailtext: "\u5F3E\u304C\u547D\u4E2D\u3059\u308B\u305F\u3073\u5C04\u6483\u30EC\u30FC\u30C8\uFF15\uFF05\u4E0A\u6607\uFF08\u6700\u592725%\uFF09\u3002\u5916\u3059\u3068\u30EA\u30BB\u30C3\u30C8"
+  icon: {fileID: 21300000, guid: 4079df3e22f34435cad83212047c85fd, type: 3}
+  model: {fileID: 2305564163631582811, guid: e016e79b8d31d464f829e36a777e2970, type: 3}
+  canStack: 0
+  usecount: 1
+  remainCount: 0
+  running: 1
+  buffStats: {fileID: 11400000, guid: 721efaaa56b7d49c8828995a1749ae10, type: 2}
+  damagebuffMultiple: 0
+  fireratebuffMultiple: 0
+  buffCount: 0
+  maxbuffCount: 5

@@ -1,10 +1,9 @@
 using UnityEngine;
-using DG.Tweening; // DOColorなどを使わない場合も、一応入れておくと安心だ、ね
+using DG.Tweening;
 
 [CreateAssetMenu(menuName = "Gun/Action/Prefabshot")]
 public class PrefabshotAction : shotAction
 { 
-    // gunbase_saigenのfireから呼び出される、よ
     public override void shot(GunBase baseGun)
     {
         GameObject b =baseGun.pManager.bulletPool.Get();

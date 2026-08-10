@@ -17,7 +17,6 @@ public class P_shotGunAction : shotAction
         float randomPitch = Random.Range(-spreadAngle, spreadAngle);
         float randomYaw = Random.Range(-spreadAngle, spreadAngle);
             
-        // マズルの現在の回転に、ランダムなブレを掛け合わせる
         Quaternion spreadRotation = Quaternion.Euler(randomPitch, randomYaw, 0);
         b.transform.rotation = baseGun.muzzlePoint.rotation * spreadRotation;
         }
@@ -36,7 +35,6 @@ public class P_shotGunAction : shotAction
         }
         }
 
-    
         if (baseGun != null)
         {
              baseGun.ApplyCameraRecoil();

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ff847cc4d22e458083770a484340849, type: 3}
   m_Name: First Shot Buff 1
   m_EditorClassIdentifier: Assembly-CSharp::FirstShotBuff
-  passiveName: FirstShot-D
-  price: 0
+  passiveName: "\u5931\u308F\u308C\u305F\u30E1\u30C0\u30EA\u30AA\u30F3"
+  price: 25
   detailtext: "\u30DE\u30AC\u30B8\u30F3\u306E\u521D\u5F3E\u306E\u30C0\u30E1\u30FC\u30B825%\u4E0A\u6607"
-  icon: {fileID: 21300000, guid: f0612ff43113d49a090adb5aa8f89147, type: 3}
-  model: {fileID: 8623918747722691885, guid: 18a246a758dae4025aae8384caa2e7a2, type: 3}
+  icon: {fileID: 21300000, guid: 0058b15622cc2470fb77b5fe33085a08, type: 3}
+  model: {fileID: 8947252645322969466, guid: 3ac43304b4b614ed6ab1343af144ec04, type: 3}
   canStack: 0
   usecount: 0
   remainCount: 0

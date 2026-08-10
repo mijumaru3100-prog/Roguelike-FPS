@@ -18,6 +18,7 @@ public abstract class EnemyAI : MonoBehaviour
     public Collider collider;
 
     public int CoinAmount = 10;
+    public float DestroyTime = 3f;
     [Header("射撃・スナイパー設定")]
     public GunBase gun;
     public float keepDistance = 10f;
@@ -62,19 +63,16 @@ if (anim != null)
 {
     float speedForAnim = 0f;
     
-    // 目的地があり、かつ実際にAgentが物理的に動いている場合のみ数値を設定
     if (agent.hasPath && agent.remainingDistance > 0.1f && agent.velocity.sqrMagnitude > 0.1f)
     {
         speedForAnim = GetAnimationSpeed(dist);
     }
-    // 動いていない（ResetPathされたなど）なら、強制的にアニメーション速度を0にする
     else
     {
         speedForAnim = 0f;
     }
 
     float currentParam = anim.GetFloat(SpeedHash);
-    // 戻る速度（5f）が遅いと滑るので、10f〜15fくらいにしてピタッと止まるようにする
     float smoothedSpeed = Mathf.Lerp(currentParam, speedForAnim, Time.deltaTime * 12f); 
     anim.SetFloat(SpeedHash, smoothedSpeed);
 }
@@ -116,7 +114,7 @@ if (anim != null)
         Vector3 eyePos = transform.position + Vector3.up * myEyeHeight;
         Vector3 direction = (targetUpperPos - eyePos).normalized;
         RaycastHit hit;
-        int mask = ~LayerMask.GetMask("Ignore Raycast", "invisibleWall", "Enemy"); 
+        int mask = ~LayerMask.GetMask("Ignore Raycast", "invisibleWall", "Enemy","galass"); 
         Debug.DrawRay(eyePos, direction * detectionRange, Color.red);
         if (Physics.Raycast(eyePos, direction, out hit, detectionRange, mask, QueryTriggerInteraction.Ignore))
         {
@@ -128,7 +126,7 @@ if (anim != null)
     {
         if (target == null) return;
         Vector3 aimTarget = target.position + Vector3.up * aimHeightOffset;
-        if (gun != null) gun.transform.LookAt(aimTarget);
+        if (gun != null) gun.muzzlePoint.transform.LookAt(aimTarget);
         bool isFleeing = IsFleeing();
         if (isFleeing || agent.velocity.sqrMagnitude < 0.2f)
         {
@@ -178,10 +176,8 @@ if (anim != null)
 
     currentState = EnemyState.Dead;
 
-    // 1. 走っている可能性のあるダメージ復帰コルーチンを完全に止める
     StopCoroutine("RecoverFromDamage");
     
-    // 2. DOTweenの揺れアニメーションが残っていたら強制終了する
     if (body != null)
     {
         body.transform.DOKill(); 
@@ -204,13 +200,11 @@ if (anim != null)
         anim.SetFloat(SpeedHash, 0);
         anim.ResetTrigger(AttackHash);
         anim.ResetTrigger(DamageHash);
-        // Deadトリガーを最優先で実行
         anim.SetTrigger(DeadHash);
     }
 
     Debug.Log(gameObject.name + " has died.");
 
-    // コインの生成処理
     if (pManager != null && pManager.coinPool != null)
     {
         GameObject c = pManager.coinPool.Get();
@@ -224,9 +218,7 @@ if (anim != null)
         }
     }
 
-    // 3. 破棄までの時間を少し長め（例: 2秒〜3秒など、モーションの長さに合わせる）にする
-    // もしくはアニメーション終了時にイベントでDestroyする形が理想です
-    Destroy(gameObject, 2.5f); 
+    Destroy(gameObject, DestroyTime); 
 }
 
 #if UNITY_EDITOR
@@ -234,27 +226,22 @@ if (anim != null)
     {
         if (!showAimDebug) return;
 
-        // 目の位置
         Vector3 eyePos = transform.position + Vector3.up * myEyeHeight;
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(eyePos, 0.15f);
 
-        // 検知範囲 (足元)
         UnityEditor.Handles.color = new Color(0f, 0.8f, 1f, 0.15f);
         UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, detectionRange);
 
         if (target == null)
         {
-            // ターゲットがいない場合、正面方向に視野コーンを描画
             DrawAimCone(eyePos, transform.forward, shootingAngleThreshold, Color.yellow);
             return;
         }
 
-        // ターゲットの狙い位置
         Vector3 targetAimPos = target.position + Vector3.up * aimHeightOffset;
         Vector3 dirToTarget = (targetAimPos - eyePos).normalized;
 
-        // 視線チェック (Raycast再現)
         int mask = ~LayerMask.GetMask("Ignore Raycast", "invisibleWall", "Enemy");
         bool canSee = false;
         Vector3 hitPoint = targetAimPos;
@@ -265,7 +252,6 @@ if (anim != null)
             hitPoint = hit.point;
         }
 
-        // 視線の描画
         if (canSee)
         {
             Gizmos.color = Color.green;
@@ -281,7 +267,6 @@ if (anim != null)
             Gizmos.DrawWireSphere(targetAimPos, 0.2f);
         }
 
-        // 射撃角度判定の描画
         float angle = Vector3.Angle(transform.forward, (target.position - transform.position).normalized);
         Color coneColor = (canSee && angle < shootingAngleThreshold) ? new Color(0f, 1f, 0f, 0.12f) : new Color(1f, 0.9f, 0f, 0.08f);
         DrawAimCone(eyePos, transform.forward, shootingAngleThreshold, coneColor);
@@ -292,11 +277,8 @@ if (anim != null)
         UnityEditor.Handles.color = color;
         Vector3 leftLimit = Quaternion.AngleAxis(-angleThreshold, Vector3.up) * forward;
         Vector3 rightLimit = Quaternion.AngleAxis(angleThreshold, Vector3.up) * forward;
-
-        // 扇形の描画 (Handles.DrawSolidArcはUNITY_EDITOR内のみ使用可能)
         UnityEditor.Handles.DrawSolidArc(origin, Vector3.up, leftLimit, angleThreshold * 2f, 3f);
         
-        // 境界線
         UnityEditor.Handles.color = new Color(color.r, color.g, color.b, 0.7f);
         Gizmos.color = new Color(color.r, color.g, color.b, 0.7f);
         Gizmos.DrawLine(origin, origin + leftLimit * 3f);

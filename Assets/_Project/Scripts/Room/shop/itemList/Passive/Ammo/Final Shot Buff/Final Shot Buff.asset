@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8362ffce25af14b4d96ba563198ca659, type: 3}
   m_Name: Final Shot Buff
   m_EditorClassIdentifier: Assembly-CSharp::FinalShotBuff
-  passiveName: Final_Shot_Buff_1
+  passiveName: "\u4E0D\u6EC5\u306E\u610F\u5FD7"
   price: 25
   detailtext: "\u30DE\u30AC\u30B8\u30F3\u306E\u6700\u7D42\u5F3E\u306E\u30C0\u30E1\u30FC\u30B850%\u4E0A\u6607"
   icon: {fileID: 21300000, guid: f689decb9739a40ec95e3911cefc38f6, type: 3}

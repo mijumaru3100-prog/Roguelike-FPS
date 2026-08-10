@@ -19,6 +19,8 @@ public class HealShop : MonoBehaviour
         if (manager == null)
         {
             manager = FindObjectOfType<PlayerManager>();
+            PlayerBuyText = manager.PlayerBuyText;
+            buyTextData = manager.buyTextData;
         }
         ShopSetting();
     }

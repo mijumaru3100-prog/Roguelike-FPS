@@ -32,6 +32,10 @@ public class shotGunAction : shotAction
                     targetHealth.OnHitBullet(baseGun.damage, hit.collider); 
                     baseGun.pManager.crosshair.OnHit();
                 }
+                else
+                {
+                    MakeHitMark(baseGun.pManager, hit, ray.direction);
+                }
             }
             else
             {

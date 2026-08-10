@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Passives/HighDamageStyle/Nodamage_DamageBuff")]
-public class BuffDamage: PassiveEffect
+[CreateAssetMenu(menuName = "Passives/HighDamageStyle/MaxHP_DamageBuff")]
+public class MaxHPBuff: PassiveEffect
 {
     public float DamageMultipleBuff;
     public float WeakBonusBuff;

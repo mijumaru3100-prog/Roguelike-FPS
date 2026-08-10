@@ -64,3 +64,39 @@ MonoBehaviour:
   - effect: {fileID: 11400000, guid: 3468eca65ce7f4c818f6377965d5e2c9, type: 2}
     additionalEffects: []
     statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: c10f4b6a7834a4eac9f7008e2d16929e, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 2a528a6edfbae4f8084080aae4bf97f7, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 638aa9555d5b54ff496f6d2261855be1, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 2e755c8259021493d880e4065b5949e0, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: f4a62dbfe13c7466999d7fe48ef6261c, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 6259afe5c241543938224ebc0f4b70a3, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 2fd97f17ffc82452385f5e113cbf0cab, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: fe16c49a3d28142f9964f609b728ef99, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: f6aa99089165b4579a8ce12c0c8366cf, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 13c32d316e5fb4ce49683ae697fce4b8, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 5715370dfd0f2473b82412746b5765e9, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}
+  - effect: {fileID: 11400000, guid: 09c81fc767ac549f78a3ca9833b24c12, type: 2}
+    additionalEffects: []
+    statBuff: {fileID: 0}

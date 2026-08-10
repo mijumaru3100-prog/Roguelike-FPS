@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ef29f395cd3e466b94670946a7e33e2, type: 3}
+  m_Name: 1K_TempBuff
+  m_EditorClassIdentifier: Assembly-CSharp::OneKillBuff
+  passiveName: "\u8ABF\u6574\u6E08\u30B9\u30C8\u30C3\u30AF"
+  price: 100
+  detailtext: "\u4E00\u6483\u30AD\u30EB\u30671.5\u79D2\u3001\u79FB\u52D5\u901F\u5EA6+50%"
+  icon: {fileID: 21300000, guid: 82deb2d4b97f64892a3be356db4c7357, type: 3}
+  model: {fileID: 2483675109287913363, guid: 665a38302027e417397ec75e6d657c83, type: 3}
+  canStack: 0
+  usecount: 0
+  remainCount: 0
+  running: 1
+  buffDuration: 1.5
+  buffStats: {fileID: 11400000, guid: 3d602cf21611646289bd373aa2e48d5d, type: 2}

@@ -16,7 +16,6 @@ public class MouseLook : MonoBehaviour
     private float recoilZ = 0f;
     private float lastShotTime;
     
-    // HandPointの「本来あるべき場所」を記憶する
     private Vector3 initialHandPos;
 
     [Header("反動設定")]
@@ -33,11 +32,12 @@ public class MouseLook : MonoBehaviour
     public float recoilSmoth = 5f;
     public float recoilSmoth_enshutu = 5f;
 
+    [HideInInspector] public bool useDirectRecoil = false;
+
     void Awake() 
     {
         if (handPoint != null)
         {
-            // 起動時の場所を「聖域」として保存しておく、よ
             initialHandPos = handPoint.localPosition; 
         }
     }
@@ -50,16 +50,16 @@ public class MouseLook : MonoBehaviour
 
     void Update()
     {
-        if (Time.timeScale == 0) return; // ← ポーズ中は処理しない
+        if (Time.timeScale == 0) return;
 
         HandleRecoilRecovery();
         CameraController();
     }
 
-    // このスクリプトのUpdateから呼び出される、よ
     private void HandleRecoilRecovery()
     {
-        // 0.1秒〜0.2秒くらいで戻り始めると、キレが良くなる、ね
+        if (useDirectRecoil) return;
+
         if (Time.time > lastShotTime + 0.15f)
         {
             if (useCameraRecoil)
@@ -75,7 +75,6 @@ public class MouseLook : MonoBehaviour
         }
     }
 
-    // このスクリプトのUpdateから呼び出される、よ
     void CameraController()
     {
         mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
@@ -87,10 +86,9 @@ public class MouseLook : MonoBehaviour
         playerBody.Rotate(Vector3.up * mouseX);
     }
 
-    // このスクリプトのCameraControllerから呼び出される、よ
     private void HandleMouseRotation(float mouseY)
     {
-        if (useCameraRecoil)
+        if (useCameraRecoil && !useDirectRecoil)
         {
             HandleRecoilCompensation(mouseY);
         }
@@ -102,13 +100,11 @@ public class MouseLook : MonoBehaviour
         cameraRotationX = Mathf.Clamp(cameraRotationX, -90f, 90f);
     }
 
-    // このスクリプトのHandleMouseRotationから呼び出される、よ
     private void HandleRecoilCompensation(float mouseY)
     {
-        // --- 視点の計算（リコイル相殺ロジック） ---
-        if (mouseY > 0 && recoilX < 0) 
+        if (mouseY < 0 && recoilX < 0) 
         {
-            recoilX += mouseY; 
+            recoilX -= mouseY; 
             if (recoilX > 0) 
             {
                 cameraRotationX -= recoilX;
@@ -121,28 +117,31 @@ public class MouseLook : MonoBehaviour
         }
     }
 
-    // このスクリプトのCameraControllerから呼び出される、よ
     private void ApplyRecoilOffsets()
     {
         float currentRecoilX = useCameraRecoil ? recoilX : 0f;
         float currentRecoilY = useCameraRecoil ? recoilY : 0f; 
 
-        // --- 1. カメラ（視点）の回転適用 ---
         transform.localRotation = Quaternion.Euler(cameraRotationX + currentRecoilX, currentRecoilY, 0f);
     }
 
-    // normalshotActionのshotから呼び出される、よ
     public void AddRecoil(float forceX, float forceY)
     {
+        if (useDirectRecoil) return;
         if (useCameraRecoil) 
         {
-            recoilX -= forceX;   // 視点を上に跳ね上げる
+            recoilX -= forceX;
             recoilY += Random.Range(-forceY, forceY);
         }
         lastShotTime = Time.time;
     }
 
-    // このスクリプトのPropertyのSetterなどから呼び出される、よ
+    public void SetRecoilDirect(float x, float y)
+    {
+        recoilX = x;
+        recoilY = y;
+    }
+
     public void ClearRecoil()
     {
         recoilX = 0f;

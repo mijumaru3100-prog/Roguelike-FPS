@@ -35,27 +35,24 @@ public class ObjectPool : MonoBehaviour
     }
    public void ReturnToPool(GameObject obj)
 {
-    // ★修正: 最初に非アクティブにする（これで物理判定やUpdateが即座に止まる）
     obj.SetActive(false);
 
     obj.transform.SetParent(transform);
     obj.transform.localPosition = Vector3.zero;
     
     PoolObject poolObject = obj.GetComponent<PoolObject>();
-    if (poolObject != null) // 念のためヌルチェック
+    if (poolObject != null)
     {
         obj.transform.localScale = poolObject.defaultScale;
     }
     obj.transform.localRotation = Quaternion.identity;
 
-    // pool.Containsのチェックを入れるとより安全です
     if (!pool.Contains(obj))
     {
         pool.Enqueue(obj);
     }
 }
 }
-
 
 public class PoolObject : MonoBehaviour
 {

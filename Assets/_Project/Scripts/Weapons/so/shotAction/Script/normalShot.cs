@@ -1,20 +1,17 @@
 using UnityEngine;
-using DG.Tweening; // DOColorなどを使わない場合も、一応入れておくと安心だ、ね
+using DG.Tweening;
 
 [CreateAssetMenu(menuName = "Gun/Action/normalshot")]
 public class normalshotAction : shotAction
 { 
-    // gunbase_saigenのfireから呼び出される、よ
     public override void shot(GunBase baseGun)
     {
         Camera cam = baseGun.playerCamera;
         
-        // 1. スタート地点を「銃口」にする。もし未設定ならカメラから。
         Vector3 startPos = baseGun.muzzlePoint != null 
                            ? baseGun.muzzlePoint.position 
                            : cam.transform.position;
 
-        // 2. 狙い（レティクル）の先を計算
         Ray ray = cam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
         Vector3 endPos;
 
@@ -32,6 +29,10 @@ public class normalshotAction : shotAction
                 targetHealth.OnHitBullet(baseGun.damage, hit.collider); 
                 baseGun.pManager.crosshair.OnHit();
             }
+            else
+            {
+                MakeHitMark(baseGun.pManager, hit, ray.direction);
+            }
         }
         else
         {
@@ -44,15 +45,12 @@ public class normalshotAction : shotAction
 
         if (baseGun.pManager.tracerPool != null)
         {
-            // 3. 生成して、向きを着弾点へ向ける
-            GameObject t = baseGun.pManager.tracerPool.Get(); // 借りる
-            t.transform.position = Vector3.zero; // 初期化が必要な場合はここで
+            GameObject t = baseGun.pManager.tracerPool.Get();
+            t.transform.position = Vector3.zero;
             LineRenderer lr = t.GetComponent<LineRenderer>();
             
-
             if (lr != null)
             {
-                // カメラの方を向くように設定（これで回転の違和感が消えるはず）
                 lr.alignment = LineAlignment.View;
 
                 lr.startWidth = 0.1f;
@@ -66,7 +64,6 @@ public class normalshotAction : shotAction
                        .OnComplete(() => baseGun.pManager.tracerPool.ReturnToPool(t));
             }
         }
-
 
         if (baseGun != null)
         {

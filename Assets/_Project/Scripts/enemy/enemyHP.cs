@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
-using System.Collections.Generic; // Listを使うために追加
+using System.Collections.Generic;
 using TMPro;
 
 public class EnemyHP : MonoBehaviour 
@@ -21,9 +21,9 @@ public class EnemyHP : MonoBehaviour
     [Header("サウンド")]
     public AudioClip HitSound;
     public AudioClip HeadShotSound;
-    public AudioClip KillClip; // タイポ修正 (KikllClip -> KillClip)
+    public AudioClip KillClip;
     public List<AudioSource> AudioSources = new List<AudioSource>();
-    private int currentIndex = 0; // 追加: オーディオソースの巡回用インデックス
+    private int currentIndex = 0;
 
     [Header("ライト演出")]
     public Light flashLight; 
@@ -31,8 +31,12 @@ public class EnemyHP : MonoBehaviour
     public float flashDuration = 0.1f;
     private Coroutine flashCoroutine;
 
-    [Header("弱点")]
+    [Header("部位設定")]
     public Collider weakPointCollider;
+    
+    [Tooltip("ここに登録されたコライダーに当たった場合、ダメージやヒット判定を完全に無視します")]
+    public List<Collider> ignoredColliders = new List<Collider>();
+
     public float defaultWeakPointBonus = 2f;
     public float WeakPointBonus
     {
@@ -44,7 +48,7 @@ public class EnemyHP : MonoBehaviour
                 foreach (var p in pManager.activePassives) totalMult += p.GetWeakPointBonus(pManager);
             }
             totalMult = Mathf.Max(0.01f, totalMult);
-            return 1 + totalMult;
+            return totalMult;
         }
     }
 
@@ -64,10 +68,13 @@ public class EnemyHP : MonoBehaviour
         }
     }
 
-    // 弾が当たった時の入り口（ここに判定を集約）
     public void OnHitBullet(float damage, Collider hitCollider)
     {
-        // ヘッドショット判定
+        if (hitCollider != null && ignoredColliders.Contains(hitCollider))
+        {
+            return;
+        }
+
         if (pManager != null && pManager.BuffFlug != null)
         {
             pManager.BuffFlug.IsHeadShot = (hitCollider == weakPointCollider);
@@ -86,7 +93,8 @@ public class EnemyHP : MonoBehaviour
 
     public void TakeDamage(float damage, Collider hitCollider)
     {
-        // OnHitBulletを通らないダメージソース（爆風など）を考慮し、ここでも念のため更新
+        if (hitCollider != null && ignoredColliders.Contains(hitCollider)) return;
+
         if (pManager != null && pManager.BuffFlug != null)
         {
             pManager.BuffFlug.IsHeadShot = (hitCollider == weakPointCollider);
@@ -97,7 +105,6 @@ public class EnemyHP : MonoBehaviour
             }
         }
 
-        // ダメージ計算
         float finalDamage = damage;
         isWeakPointDamage = false;
 
@@ -112,7 +119,6 @@ public class EnemyHP : MonoBehaviour
             }
         }
 
-        // バフフラグ管理
         if (pManager != null && pManager.BuffFlug != null)
         {
             pManager.BuffFlug.IsOneShotKill = (currentHP <= finalDamage && maxHP <= currentHP);
@@ -130,7 +136,6 @@ public class EnemyHP : MonoBehaviour
             HandleDamageText(Mathf.RoundToInt(finalDamage), isWeakPointDamage);
         }
 
-        // パッシブ管理
         if (pManager != null)
         {
             foreach (var p in pManager.activePassives)
@@ -169,7 +174,6 @@ public class EnemyHP : MonoBehaviour
         text.text = totalDamage.ToString();
         damageTextPrefab.SetActive(true);
         
-        // コルーチンの重複実行を防ぐため、一度止めてから再スタートさせるのが安全
         StopCoroutine(nameof(HideDamageText));
         StartCoroutine(nameof(HideDamageText));
     }
@@ -183,7 +187,10 @@ public class EnemyHP : MonoBehaviour
         }
     }
 
-    void Death()
+    [Header("Effects")]
+[SerializeField] private ParticleSystem deathEffect;
+
+void Death()
     {
         AudioSource source = SelectSource();
         if (source != null)
@@ -192,6 +199,11 @@ public class EnemyHP : MonoBehaviour
             source.Play();
         }
             
+        if (deathEffect != null)
+        {
+            deathEffect.Play();
+        }
+
         if (_enemyAI != null) _enemyAI.OnDie();
     }
 
@@ -232,7 +244,6 @@ public class EnemyHP : MonoBehaviour
     private AudioSource SelectSource()
     {
         AudioSource source = null;
-        // タイポ修正 (shotAudioSources -> AudioSources)
         if (AudioSources != null && AudioSources.Count > 0)
         {
             source = AudioSources[currentIndex];

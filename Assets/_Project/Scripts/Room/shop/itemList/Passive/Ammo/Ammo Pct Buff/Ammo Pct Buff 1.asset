@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af59aca2ffbbb484098bd1f4ecbc00f7, type: 3}
   m_Name: Ammo Pct Buff 1
   m_EditorClassIdentifier: Assembly-CSharp::AmmoPctBuff
-  passiveName: Ammo_Pct_Buff_2
+  passiveName: "\u53E4\u4EE3\u306E\u5C0E\u304D"
   price: 100
   detailtext: "\u6B8B\u5F3E\u304C70%\u4EE5\u4E0A\u306E\u5834\u5408\u3001\u5C04\u6483\u30EC\u30FC15%\u4E0A\u6607"
-  icon: {fileID: 21300000, guid: 5ee3c95d5137c45bfabd5a984dd19d48, type: 3}
-  model: {fileID: 2371343631518978863, guid: ae259f1bedd194e13b66b22bcdcbd643, type: 3}
+  icon: {fileID: 21300000, guid: f59fc819fd49d47fe9c2117f5958dc4e, type: 3}
+  model: {fileID: 4371241635783681559, guid: 63f8b1364bb4343bfaea8987b573ad10, type: 3}
   canStack: 0
   usecount: 0
   remainCount: 0

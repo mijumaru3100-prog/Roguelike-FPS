@@ -23,6 +23,8 @@ public class passiveshop : MonoBehaviour
 
     void Start()
     {
+        PlayerBuyText = manager.PlayerBuyText;
+        buyTextData = manager.buyTextData;
         ShopSetting();
     }
 
@@ -41,20 +43,16 @@ public class passiveshop : MonoBehaviour
 
     public void ShopSetting()
     {
-        // 1. ショップの状態をリセット
         used = false; 
         ResetShop();
         
-        // 2. 新しいアイテムを取得
         selected = itempool.GetRandom(manager);
         if (selected == null) return;
 
-        // 3. UIの更新
         nameText.text = selected.effect.passiveName;
         priceText.text = selected.effect.price.ToString();
         detailText.text = selected.effect.detailtext;
 
-        // 4. モデルの再生成
         if (model != null) Destroy(model);
         if (modelSpawnPos != null)
         {
@@ -64,7 +62,6 @@ public class passiveshop : MonoBehaviour
             model.transform.LookAt(manager.transform.position);
         }
 
-        // 5. プレイヤーが既に範囲内にいる場合はテキストを即時更新
         if (isInside)
         {
             UpdateBuyText();
@@ -111,7 +108,6 @@ public class passiveshop : MonoBehaviour
         
         if (manager.TrySpendMoney(selected.effect.price))
         {
-            // パッシブ効果の適用
             if (selected.effect != null) manager.AddPassive(selected.effect);
             if (selected.additionalEffects != null)
             {

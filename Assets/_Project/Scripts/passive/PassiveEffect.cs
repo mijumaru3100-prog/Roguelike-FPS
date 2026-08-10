@@ -2,7 +2,6 @@ using UnityEngine;
 
 public abstract class PassiveEffect : ScriptableObject
 {
-    // 基本ステータス //
     public string passiveName;
     public int price;
     public string detailtext; 
@@ -19,7 +18,6 @@ public abstract class PassiveEffect : ScriptableObject
     public virtual float GetWeakPointBonus(PlayerManager manager) => 0; 
     public virtual float GetReloadSpeedMultiplier(PlayerManager manager) => 0; 
          
-
     // パッシブ取得 //(Pmanager)
     public virtual void OnGetThisPassive(PlayerManager manager) { }
     public virtual void OnGetPassive(PlayerManager manager) { }
@@ -45,33 +43,25 @@ public abstract class PassiveEffect : ScriptableObject
     public virtual void OnShotComplete(PlayerManager manager) { }
     public virtual void OnMiss(PlayerManager manager) { }
 
-
     // リロード //(GunBase)
     public virtual void OnReloadComplete(PlayerManager manager) { }
     public virtual void OnBeforeReload(PlayerManager manager) { }
 
     // 被弾・回復 //(PlayerHP)
     public virtual void OnGetDamage(PlayerManager manager) { }
-    public virtual void OnHeal(PlayerManager manager) { }
+    public virtual void OnHeal(PlayerManager manager,int amount,PlayerHP HP) { }
 
-
-    // 戦闘開始 //
     public virtual void OnBattleStart(PlayerManager manager) { }
     public virtual void OnBattleClear(PlayerManager manager) { }
 
-    // ボス //
     // public virtual void OnBossStart(PlayerManager manager) { }
     // public virtual void OnBossEnd(PlayerManager manager) { }
 
-    // ADS //
     public virtual void OnADSStart(PlayerManager manager) { }
     public virtual void OnADSEnd(PlayerManager manager) { }
 
-    // ジャンプ //
     public virtual void OnJump(PlayerManager manager) { }
 
-
-    // ショップ //
     // public virtual void OnShopEnter(PlayerManager manager) { }
     // public virtual void OnShopBuy(PlayerManager manager) { }
     // public virtual void OnShopExit(PlayerManager manager) { }

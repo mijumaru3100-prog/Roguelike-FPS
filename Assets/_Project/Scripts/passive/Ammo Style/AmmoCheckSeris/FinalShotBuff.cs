@@ -6,50 +6,31 @@ public class FinalShotBuff: PassiveEffect
     public float DamageMultipleBuff;
     public float WeakBonusBuff;
 
-    private bool Isrunning = false;
-
     public override void OnGetThisPassive(PlayerManager manager)
     {
-        Isrunning = false;
+        running = false;
     }
 
     public override void OnReloadComplete(PlayerManager manager)
     {
-        Isrunning = false; 
-    }
-    public override void OnShotComplete(PlayerManager manager)
-    {
-        if(manager.currentWeapon.currentAmmo-1 == 0)
-        {
-            Isrunning = true;
-        }
-        else
-        {
-            Isrunning = false;
-        }
+        running = false; 
     }
 
-    public override void OnBeforeShot(PlayerManager manager)
+    private void CheckAmmo(PlayerManager manager)
     {
-        if(manager.currentWeapon.currentAmmo-1 == 0)
-        {
-            Isrunning = true;
-        }
-        else
-        {
-            Isrunning = false;
-        }
+        running = (manager.currentWeapon.currentAmmo == 1);
     }
-    // ステータス倍率 //(GunBase)   
+
+    public override void OnBeforeShot(PlayerManager manager) => CheckAmmo(manager);
+    public override void OnShotComplete(PlayerManager manager) => CheckAmmo(manager);
+
     public override float GetDamageMultiplier(PlayerManager manager)
     {
-        if(Isrunning) return DamageMultipleBuff;
-        else return 0;
+        return running ? DamageMultipleBuff : 0;
     }
     
     public override float GetWeakPointBonus(PlayerManager manager)
     {
-        if(Isrunning) return WeakBonusBuff;
-        else return 0;
+        return running ? WeakBonusBuff : 0;
     }
 }

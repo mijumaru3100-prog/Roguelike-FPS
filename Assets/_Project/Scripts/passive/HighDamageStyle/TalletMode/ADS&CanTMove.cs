@@ -7,7 +7,7 @@ public class ADS_CanTMove: PassiveEffect
     [SerializeField] private float buffCoolTime = 1f;
     [SerializeField] private PlayerStats buffStats;
     public int maxCount;
-    [SerializeField] private bool isAdditive;
+
     private Coroutine activeCoroutine;
     public override void OnADSStart(PlayerManager manager)
     {

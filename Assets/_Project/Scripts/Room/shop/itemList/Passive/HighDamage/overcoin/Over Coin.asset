@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ff40903fecca4e04b1b0157e9663446, type: 3}
   m_Name: Over Coin
   m_EditorClassIdentifier: Assembly-CSharp::OverCoin
-  passiveName: 
-  price: 0
-  detailtext: 
-  icon: {fileID: 0}
-  model: {fileID: 0}
+  passiveName: "\u9B54\u5C0E\u76AE\u888B"
+  price: 200
+  detailtext: "\u30AA\u30FC\u30D0\u30FC\u30AD\u30EB\u6642\u3001\u8D85\u904E\u30C0\u30E1\u30FC\u30B8\u5272\u5408\u306B\u5FDC\u3058\u305F\u78BA\u7387\u3067100G\u7372\u5F97"
+  icon: {fileID: 21300000, guid: af1e7c9ea31f6448c94b4a9506fcb94e, type: 3}
+  model: {fileID: 7532199588972849531, guid: cb7bf75508c754593be19b7d6f5f0319, type: 3}
   canStack: 0
   usecount: 0
   remainCount: 0
   running: 1
+  Amount: 10

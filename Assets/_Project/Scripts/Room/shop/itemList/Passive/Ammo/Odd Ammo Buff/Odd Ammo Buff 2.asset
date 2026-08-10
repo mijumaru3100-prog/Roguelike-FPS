@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef1c4a0cd25cf4156b03a1fbdd934501, type: 3}
   m_Name: Odd Ammo Buff 2
   m_EditorClassIdentifier: Assembly-CSharp::OddAmmoBuff
-  passiveName: OddAmmo_R
+  passiveName: "\u87BA\u65CB\u30DE\u30D5\u30E9\u30FC"
   price: 100
   detailtext: "\u6B8B\u5F3E\u304C\u5947\u6570\u306E\u6642\u3001\u30EA\u30ED\u30FC\u30C9\u901F\u5EA6+5%"
-  icon: {fileID: 21300000, guid: 1fdd20c981edf4b1991c11373c9a17ae, type: 3}
-  model: {fileID: 745723399731893756, guid: 30648859bfc3745b3bb853886e46cda7, type: 3}
+  icon: {fileID: 21300000, guid: 8722dbf4cc3bc4032881bae0d6d81803, type: 3}
+  model: {fileID: 6586153355314853350, guid: 14aa2c3390430409fb5ab7553f42c5a6, type: 3}
   canStack: 1
   usecount: 0
   remainCount: 0
-  running: 1
+  running: 0
   DamageMultipleBuff: 0
   WeakBonusBuff: 0
   ReloadSpeedBuff: 0.05

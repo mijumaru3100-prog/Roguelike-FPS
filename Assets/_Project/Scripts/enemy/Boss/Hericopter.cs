@@ -12,12 +12,12 @@ public class Hericopter : MonoBehaviour
     [Header("共通設定")]
     public PlayerManager pManager;
     public Transform target;
-    public Transform model; // 動かすヘリコプターのモデル
+    public Transform model;
     public EnemyHP HP;
     
     [Header("射撃（移動）設定")]
-    public float AttackShiftTime; // ポイントへの移動時間
-    public float MachineGunAttackTime; // ポイント間の移動時間
+    public float AttackShiftTime;
+    public float MachineGunAttackTime;
     
     public LayerMask obstacleLayer;
     public Transform AttckPoint_1A;
@@ -35,8 +35,6 @@ public class Hericopter : MonoBehaviour
     public int damage = 1; 
     public float bulletSpeed = 10;
 
-      
-
     [Header("回転設定")]
     public float rotationSpeed = 4f;
     public float IdleTime;
@@ -44,13 +42,11 @@ public class Hericopter : MonoBehaviour
     public bool isChangingState;
     private float currentAngle;
 
-    // 【変更】ワールド座標を保存する
     private Vector3 defaultWorldPosition;
 
     private void Start() 
     {
         currentState = ActionState.Idle;
-        // 【修正】起動時のモデルの初期「ワールド座標」を保存
         if (model != null) defaultWorldPosition = model.position;
 
         NextMuzzle = L_muzzlePoint;
@@ -100,7 +96,6 @@ public class Hericopter : MonoBehaviour
     public void Idle()
     {
         currentAngle += rotationSpeed * Time.deltaTime;  
-        // 本体（自分自身）を回転させる
         transform.localEulerAngles = new Vector3(0, currentAngle, 0);
         
         if (!isChangingState)
@@ -118,7 +113,6 @@ public class Hericopter : MonoBehaviour
         Transform atackStartPoint = null;
         Transform atackEndPoint = null;
 
-        // 角度によって移動ポイントを決める
         float angle = currentAngle % 360;
         if (angle < 0) angle += 360;
 
@@ -163,22 +157,15 @@ public class Hericopter : MonoBehaviour
 
         Sequence seq = DOTween.Sequence();
 
-        // --- 【大修正】すべてワールド座標（DOMove, .position）にする ---
-
-        // 1. 開始ポイント（ワールド座標）へ移動
         seq.Append(model.DOMove(atackStartPoint.position, AttackShiftTime));
         seq.AppendCallback(() =>
         {
             StartCoroutine(FireMachineGun(MachineGunAttackTime));
         });
         
-        // 2. 終了ポイント（ワールド座標）へ移動
         seq.Append(model.DOMove(atackEndPoint.position, MachineGunAttackTime));
         
-        // 3. 元の位置（保存しておいたワールド座標）に戻る
         seq.Append(model.DOMove(defaultWorldPosition, AttackShiftTime));
-        
-        // -----------------------------------------------------------------
         
         seq.OnComplete(() => {
             StartCoroutine(ChangeNextState(0));
@@ -200,10 +187,8 @@ public class Hericopter : MonoBehaviour
         GameObject b =pManager.bulletPool.Get();
         b.transform.position = NextMuzzle.position;
         
-        
         float randomPitch = Random.Range(-spreadAngle, spreadAngle);
             
-        // マズルの現在の回転に、ランダムなブレを掛け合わせる
         Quaternion spreadRotation = Quaternion.Euler(randomPitch, 0, 0);
         b.transform.rotation = NextMuzzle.rotation * spreadRotation;
         

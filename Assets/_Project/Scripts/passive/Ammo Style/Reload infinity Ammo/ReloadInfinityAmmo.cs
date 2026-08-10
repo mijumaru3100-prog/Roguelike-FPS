@@ -9,14 +9,13 @@ public class ReloadInfinityAmmo : PassiveEffect
     public override void OnReloadComplete(PlayerManager manager)
     {
         LastReloadTime = Time.time;
-        runningSwitch();
+        manager.StartCoroutine(runningSwitch());
     }
     public override void OnShotComplete(PlayerManager manager)
     {
-        if(Time.time < LastReloadTime+InfinitTime)
+        if(running)
         {
-            manager.currentWeapon.currentAmmo++;
-            manager.currentWeapon.UpdateAmmoDisplay(); 
+            manager.currentWeapon.AddAmmoAnimated(1, 0.1f);
         }
     }
 

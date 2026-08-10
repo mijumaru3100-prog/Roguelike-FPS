@@ -3,13 +3,11 @@ using UnityEngine;
 public class AmmoChancePassive : PassiveEffect
 {
     [Range(0, 1)] public float chance = 0.3f;
-    public override void OnShotComplete(PlayerManager manager)
+    public override void OnHitBullet(PlayerManager manager,float damage, EnemyHP enemyHP)
     {
         if (Random.value < chance)
         {
-            GunBase gun = manager.currentWeapon;
-            gun.currentAmmo++; 
-            gun.UpdateAmmoDisplay();
+            manager.currentWeapon.AddAmmoAnimated(1, 0.1f);
             Debug.Log("弾薬節約発動！");
         }
     }

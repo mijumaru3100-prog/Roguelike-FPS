@@ -9,34 +9,33 @@ using Random = UnityEngine.Random;
 public class GunBase : MonoBehaviour
 {
     public int baseMaxAmmo = 30;
-    public int maxAmmo => Mathf.RoundToInt(Mathf.Max(1,(baseMaxAmmo + stats.bonusMaxAmmo) * (1+stats.maxAmmoMultiple)));
+    public virtual int maxAmmo => Mathf.RoundToInt(Mathf.Max(1,(baseMaxAmmo + stats.bonusMaxAmmo) * (1+stats.maxAmmoMultiple)));
     public void RefreshMaxAmmoUI()
     {
         if (isNPC) return;
 
         if (ammoBeltUI != null)
         {
-            // この瞬間の maxAmmo（プロパティ）の計算結果を取得して渡す。
-            // 弾の生成処理（ InitializeAmmoBelt ）を走らせる。
             ammoBeltUI.InitializeAmmoBelt(currentAmmo, maxAmmo,uiBulletSprite,uiWeaponSprite);
         }
     }
-    public int currentAmmo = 30;
+    protected int _currentAmmo;
+
+    public int currentAmmo => _currentAmmo;
     public float defaultRPM = 450;
-    public float fireRate
+    public virtual float fireRate
     {
         get
         {
             float totalMult = stats.fireRateMultiple;
             if (pManager != null)
             {
-                foreach (var p in pManager.activePassives) totalMult += p.GetFireRateMultiplier(pManager);
+                foreach (var p in pManager.activePassives.ToArray()) totalMult += p.GetFireRateMultiplier(pManager);
             }
             totalMult = Mathf.Max(0.01f, totalMult);
             return ((60f / defaultRPM) / (1+totalMult));
         }
     }
-    
     
     public int baseDamage = 1;
     public int damage
@@ -46,7 +45,7 @@ public class GunBase : MonoBehaviour
             float totalMult = stats.damageMultiple;
             if (pManager != null)
             {
-                foreach (var p in pManager.activePassives) totalMult += p.GetDamageMultiplier(pManager);
+                foreach (var p in pManager.activePassives.ToArray()) totalMult += p.GetDamageMultiplier(pManager);
             }
             return Mathf.Max(1,Mathf.RoundToInt((baseDamage + stats.bonusDamage) * (1+totalMult)));
         }
@@ -54,39 +53,52 @@ public class GunBase : MonoBehaviour
 
     [Header("カメラ反動")]
     public float recoilForce = 0.25f; 
-    
-    
-    public float ADSMagnification  =0.5f;
+    public float ADSMagnification = 0.5f;
     public float horizontalRecoilForce = 0.1f;
+
+    private float camTargetX;
+    private float camCurrentX;
+    private float camTargetY;
+    private float camCurrentY;
 
     public float GetTotalReloadSpeedMultiplier()
     {
         float totalMult = stats.reloadSpeedMultiple;
         if (pManager != null)
         {
-            foreach (var p in pManager.activePassives) 
+            foreach (var p in pManager.activePassives.ToArray()) 
             totalMult += p.GetReloadSpeedMultiplier(pManager);
         }
         totalMult = 1 + Mathf.Max(0.01f, totalMult);
         return totalMult;
     }
 
-    [Header("銃反動(見た目)")]    
-    public Vector3 posRecoil = new Vector3(0, 0, -0.1f);
-    public Vector3 MaxPosRecoil = new Vector3(0, 0, -0.1f);
-    public Vector3 adsPosRecoil = new Vector3(0, 0, -0.1f);
-    public Vector3 rotRecoil = new Vector3(5f, 2f, 0); // x:垂直, y:水平ランダム幅//
-    public Vector3 MaxrotRecoil = new Vector3(5f, 2f, 0);
-    public float gunRotation_adsMagnification = 0.8f; // 覗き込み時の倍率
-    public float animDuration = 0.05f;
+    [Header("銃反動(見た目) ── 加算+Lerp方式")]
+    [Tooltip("後退量(z)、横ブレ(x)、上下(y)")]
+    public float kickBack  = 0.05f;
+    public float kickUp    = 0.05f;
+    public int maxRotX = 10;
+    public float kickSide  = 2.0f;
+    public int maxRotY = 10;
+    [Tooltip("ADS時の銃リコイル倍率")]
+    public float gunRotation_adsMagnification = 0.8f;
+    [Tooltip("targetが0へ戻る速度")]
+    public float returnSpeed   = 8f;
+    [Tooltip("currentがtargetへ追従する速度")]
+    public float snapSpeed = 16f;
 
-    float lastFireTime;
+    private Vector3 gunTargetPos;
+    private Vector3 gunCurrentPos;
+    private Vector3 gunTargetRot;
+    private Vector3 gunCurrentRot;
+
+    protected float lastFireTime;
 
     [Header("設定")]
     public PlayerManager pManager;
     public Camera playerCamera;
-    public Transform adsPivot;      // 旧 handpoint (ADSの移動用)
-    public Transform recoilPivot;   // 新 handpoint2 (反動・アニメ用)
+    public Transform adsPivot;
+    public Transform recoilPivot;
     public CrosshairController crosshair;
     
     [Header("銃パーツのアニメーションリスト")]
@@ -96,9 +108,9 @@ public class GunBase : MonoBehaviour
     public bool useEject = false; 
     public enum EjectKind { Normal, ShotGun}
     public EjectKind currentEject = EjectKind.Normal;
-    public Transform ejectPoint;      // 排出口（エジェクションポート）の位置
-    public Vector2 ejectForceRange = new Vector2(3f, 5f); // 飛ばす力の強さ
-    public Vector2 ejectTorqueRange = new Vector2(10f, 20f); // 回転のランダム性
+    public Transform ejectPoint;
+    public Vector2 ejectForceRange = new Vector2(3f, 5f);
+    public Vector2 ejectTorqueRange = new Vector2(10f, 20f);
 
     [Header("UI弾丸画像設定")]
     public Sprite uiWeaponSprite; 
@@ -106,8 +118,8 @@ public class GunBase : MonoBehaviour
 
     [Header("ヒート設定")]
     public float currentHeat = 0f;
-    public float heatPerShot = 1f;    // 1発でどれくらい溜まるか
-    public float coolDownRate = 4f;    // 1秒でどれくらい冷めるか
+    public float heatPerShot = 1f;
+    public float coolDownRate = 4f;
 
     [Header("UI設定")]
     public TextMeshProUGUI ammoText; 
@@ -126,7 +138,6 @@ public class GunBase : MonoBehaviour
     [Header("プラグイン")]
     public shotMode shotMode;
     public shotAction shotAction; 
-    public recoilAnimation recoilAnimation;
     public reloadAnimation reloadAnimation; 
     public PlayerStats stats;
 
@@ -138,7 +149,6 @@ public class GunBase : MonoBehaviour
     public GameObject bulletPrefab;
     public float DefaltReloadTime = 3f;
     }
-
 
     [Header("音設定 (個別音源用)")]
     [Tooltip("射撃音用の音源。複数ある場合は交互に再生され、連射時の音途切れを防ぎます。")]
@@ -156,33 +166,33 @@ public class GunBase : MonoBehaviour
     [SerializeField, Range(0, 2)] private float pitchRandomness = 0.1f;
 
     [Header("----------空撃ち設定----------")]
-    public AudioClip dryFireSound; // 「カチッ」という小さな音
+    public AudioClip dryFireSound;
 
     [Header("----------残弾演出設定----------")]
-    [SerializeField] private AudioClip kinKinSound; // キンキンする高い金属音
+    [SerializeField] private AudioClip kinKinSound;
 
     [Header("キンキン演出の調整（ミキサー）")]
     [Range(0f, 1f)] 
-    public float changeStartThreshold = 0.3f; // いつから始める？（0.3 = 残り30%）
+    public float changeStartThreshold = 0.3f;
 
     [Range(0.5f, 2.0f)] 
-    public float maxPitchShift = 1.1f;        // 最後の1発のピッチはどこまで上げる？
+    public float maxPitchShift = 1.1f;
 
     [Range(0f, 1f)] 
-    public float maxKinKinVolume = 0.8f;      // キンキン音の最大音量は？
+    public float maxKinKinVolume = 0.8f;
 
     [Range(0f, 0.05f)]
-    public float kinKinDelay = 0.02f; // これをインスペクターでいじる
+    public float kinKinDelay = 0.02f;
 
     [Header("マズルフラッシュ設定（ライト式）")]
-    public Light muzzleFlashLight; // さっき作った Point Light を登録して、ね
-    public float flashDuration = 0.05f; // 閃光が光っている時間（ごく短く）
-    public float maxIntensity = 15f;  // 最大の眩しさ
+    public Light muzzleFlashLight;
+    public float flashDuration = 0.05f;
+    public float maxIntensity = 15f;
 
     [Header("覗き込み（ADS）設定")]
-    public Vector3 adsPosition;    // 覗き込んだ時のローカル座標
-    public float adsSpeed = 0.1f;  // 覗き込む速さ（秒）
-    public float adsFieldOfView = 40f; // 覗き込んだ時の視野角（少しズームする、よ）
+    public Vector3 adsPosition;
+    public float adsSpeed = 0.1f;
+    public float adsFieldOfView = 40f;
     public Vector3 adsRotation;
 
     [Header("銃取得時の配置設定")]
@@ -195,19 +205,16 @@ public class GunBase : MonoBehaviour
     public float BackwardOffset = 0.1f;
     public float swayAmount = 1.5f;
 
-    
     private Vector3 defaultGunPosition;
     private Vector3 defaultGunRotation;
     private float defaultFOV;
     public bool isAiming = false;
     public bool isReloading = false;
 
-
     public bool isNPC = false;
     [SerializeField]private bool useMuzzleFlashLight = true;
     
-
-    void Start()
+    protected virtual void Start()
     {
         if(isNPC)
         {
@@ -218,12 +225,10 @@ public class GunBase : MonoBehaviour
             return;
         }
 
-
-
         isReloading = false;
         if(!isNPC)
         {
-            currentAmmo = maxAmmo;
+            _currentAmmo = maxAmmo;
             crosshair = pManager.crosshair;
         
         defaultGunPosition = adsPivot.localPosition;
@@ -235,32 +240,32 @@ public class GunBase : MonoBehaviour
             playerCamera = Camera.main;
         }
 
-        // カメラが設定された（または既にあった）後に、必ず元の視野角を保存するようにします
         if (playerCamera != null)
         {
             defaultFOV = playerCamera.fieldOfView;
+
+            var ml = playerCamera.GetComponent<MouseLook>();
+            if (ml != null) ml.useDirectRecoil = true;
         }
 
         if (ammoBeltUI != null && isNPC == false)
         {
-            // maxAmmo はプロパティで計算されているので、現在の値を渡す
             ammoBeltUI.InitializeAmmoBelt(currentAmmo, maxAmmo,uiBulletSprite,uiWeaponSprite);
         }
         UpdateAmmoDisplay();
         }
         else
         {
-            currentAmmo = baseMaxAmmo;
+            _currentAmmo = baseMaxAmmo;
         }
     }
 
     void Update()
     {
-        if (Time.timeScale == 0) return; // ← ポーズ中は処理しない
+        if (Time.timeScale == 0) return;
 
         if(isNPC){return;}
 
-　　　　　// 1. 魂(Mode)に「今、撃つべき？」と問いかける
         if (shotMode != null && shotMode.IsFiring())
         {
            tryFire();
@@ -272,6 +277,7 @@ public class GunBase : MonoBehaviour
         }
 
         HandleADS();
+        UpdateRecoil();
 
         if (currentHeat > 0) 
         {
@@ -279,7 +285,6 @@ public class GunBase : MonoBehaviour
         }
     }
 
-    // このスクリプトのUpdateから呼び出される、よ
     public void tryFire()
     {
         if (isReloading)
@@ -299,7 +304,6 @@ public class GunBase : MonoBehaviour
                 AudioSource source = dryFireAudioSource != null ? dryFireAudioSource : (reloadAudioSource != null ? reloadAudioSource : GetComponent<AudioSource>());
                 if (source != null)
                 {
-                    // 空撃ち音はピッチを少しだけ高くすると、乾いた感じが出るんだ、よ
                     source.pitch = 1.2f; 
                     source.PlayOneShot(dryFireSound);
                 }
@@ -311,12 +315,11 @@ public class GunBase : MonoBehaviour
         fire();
     }
 
-    // このスクリプトのtryFireから呼び出される、よ
-    void fire()
+    protected virtual void fire()
     {
        if(isNPC == false)
         {
-            foreach (var p in pManager.activePassives)
+            foreach (var p in pManager.activePassives.ToArray())
             {
                 p.OnBeforeShot(pManager);
             }
@@ -328,9 +331,8 @@ public class GunBase : MonoBehaviour
             return;
         }
 
-        currentAmmo --;
+        _currentAmmo --;
         lastFireTime = Time.time;
-
 
         if(isNPC == false)
         {
@@ -355,11 +357,10 @@ public class GunBase : MonoBehaviour
 
              if (crosshair != null)
             {
-                // 撃つたびにレティクルを 10 ずつ広げる！
                 crosshair.AddSpread(10f); 
             }
 
-            foreach (var p in pManager.activePassives)
+            foreach (var p in pManager.activePassives.ToArray())
             {
                 p.OnShotComplete(pManager);
             }
@@ -368,51 +369,63 @@ public class GunBase : MonoBehaviour
         if(useEject) EjectShell();
     }
     
-
-    // 銃本体の見た目の反動を制御する、よ
-    public void ApplyGunRecoil()
+    private void UpdateRecoil()
     {
-        if (recoilAnimation == null || gunTiltModel == null || isNPC) return;
+        if (isNPC) return;
 
-        // 1. 次の反動ベクトル（回転）を計算する
-        // 基本のランダムな反動
-        float horizontalRecoil = Random.Range(-rotRecoil.y,rotRecoil.y);
-
-        // 「偏り」を検知して補正する
-        float currentY = gunTiltModel.localEulerAngles.y;
-        if (currentY > 180) currentY -= 360; 
-        float bias = currentY * 0.5f; 
-        horizontalRecoil -= bias; 
-
-        Vector3 finalRot = new Vector3(rotRecoil.x, horizontalRecoil, 0);
-        Vector3 finalPos = isAiming ? adsPosRecoil : posRecoil;
-
-        if (isAiming)
+        if (recoilPivot != null)
         {
-            finalRot *= gunRotation_adsMagnification;
+            gunTargetPos = Vector3.Lerp(gunTargetPos, Vector3.zero, returnSpeed * Time.deltaTime);
+            gunTargetRot = Vector3.Lerp(gunTargetRot, Vector3.zero, returnSpeed * Time.deltaTime);
+
+            gunCurrentPos = Vector3.Lerp(gunCurrentPos, gunTargetPos, snapSpeed * Time.deltaTime);
+            gunCurrentRot = Vector3.Lerp(gunCurrentRot, gunTargetRot, snapSpeed * Time.deltaTime);
+
+            recoilPivot.localPosition = gunCurrentPos;
+            recoilPivot.localRotation = Quaternion.Euler(gunCurrentRot);
         }
 
-        // 2. アニメーション実行
-        recoilAnimation.Play(this);
+        var mouseLook = playerCamera != null ? playerCamera.GetComponent<MouseLook>() : null;
+        if (mouseLook != null && mouseLook.useCameraRecoil)
+        {
+            camTargetX = Mathf.Lerp(camTargetX, 0f, returnSpeed * Time.deltaTime);
+            camTargetY = Mathf.Lerp(camTargetY, 0f, returnSpeed * Time.deltaTime);
+            camCurrentX = Mathf.Lerp(camCurrentX, camTargetX, snapSpeed * Time.deltaTime);
+            camCurrentY = Mathf.Lerp(camCurrentY, camTargetY, snapSpeed * Time.deltaTime);
+            mouseLook.SetRecoilDirect(camCurrentX, camCurrentY);
+        }
     }
 
-    // カメラ（視点）の跳ね上がりを制御する、よ
+    public void ApplyGunRecoil()
+    {
+        if (recoilPivot == null || isNPC) return;
+
+        float adsScale = isAiming ? gunRotation_adsMagnification : 1f;
+        float side = Random.Range(-kickSide, kickSide) * adsScale;
+
+        gunTargetPos += new Vector3(0f, 0f, -kickBack * adsScale);
+
+        gunTargetRot += new Vector3(kickUp * adsScale, side, 0f);
+
+        gunTargetRot.x = Mathf.Clamp(gunTargetRot.x, -maxRotX, maxRotX);
+        gunTargetRot.y = Mathf.Clamp(gunTargetRot.y, -maxRotY, maxRotY);
+
+        ApplyCameraRecoil();
+    }
+
     public void ApplyCameraRecoil()
     {
-        if(isNPC)return;
+        if (isNPC) return;
 
-        var mouseLook = playerCamera.GetComponent<MouseLook>();
-        if (mouseLook != null)
+        float fX = recoilForce;
+        float fY = horizontalRecoilForce;
+        if (isAiming)
         {
-            float fX = recoilForce;
-            float fY = horizontalRecoilForce;
-            if (isAiming)
-            {
-                fX *= ADSMagnification;
-                fY *= ADSMagnification;
-            }
-            mouseLook.AddRecoil(fX, fY);
+            fX *= ADSMagnification;
+            fY *= ADSMagnification;
         }
+        camTargetX -= fX;
+        camTargetY += Random.Range(-fY, fY);
     }
     
     private int currentIndex = 0;
@@ -435,7 +448,6 @@ public class GunBase : MonoBehaviour
 
         AudioClip clipToPlay = ShotSounds[Random.Range(0, ShotSounds.Length)];
 
-        // --- 残弾演出の計算 ---
         float ammoRatio = (float)currentAmmo / maxAmmo;
         float dynamicPitch = 1.0f;
         float kinKinVolume = 0f;
@@ -443,27 +455,22 @@ public class GunBase : MonoBehaviour
         if (ammoRatio < changeStartThreshold)
         {
             float effectProgress = 1.0f - (ammoRatio / changeStartThreshold);
-            // 弾が減るほど、dynamicPitch は 1.0 から maxPitchShift へ近づく、よ
             dynamicPitch = Mathf.Lerp(1.0f, maxPitchShift, effectProgress);
             kinKinVolume = effectProgress * maxKinKinVolume;
         }
 
-        // --- 再生実行 ---
         source.clip = clipToPlay;
         
-        // 基本のランダム性に、計算した dynamicPitch を掛け合わせるんだ、ね
         source.pitch = (1.0f + Random.Range(-pitchRandomness, pitchRandomness)) * dynamicPitch;
         
         source.Play();
 
-        // キンキン音の重層化
         if (kinKinVolume > 0 && kinKinSound != null)
         {
             StartCoroutine(DelayedKinKin(kinKinVolume));
         }
     }
 
-    // キンキン音専用の「遅延実行」コルーチン
     private IEnumerator DelayedKinKin(float volume)
     {
         yield return new WaitForSeconds(kinKinDelay);
@@ -471,7 +478,6 @@ public class GunBase : MonoBehaviour
         AudioSource source = kinKinAudioSource != null ? kinKinAudioSource : (shotAudioSources != null && shotAudioSources.Count > 0 ? shotAudioSources[0] : GetComponent<AudioSource>());
         if (source != null)
         {
-            // メインの音が鳴っている最中に、後から「カキンッ！」と重ねる
             source.PlayOneShot(kinKinSound, volume);
         }
     }
@@ -481,11 +487,11 @@ public class GunBase : MonoBehaviour
         AudioSource source = reloadAudioSource != null ? reloadAudioSource : GetComponent<AudioSource>();
         if (clip == null || source == null) return;
         
-        source.pitch = 1.0f; // リロードは正確な音で。
-        source.PlayOneShot(clip, 1.0f); // 音量は1.0でしっかり聴かせる、よ
+        source.pitch = 1.0f;
+        source.PlayOneShot(clip, 1.0f);
     }
 
-    void EjectShell()
+    protected void EjectShell()
     {
         if(ejectPoint == null)
         {
@@ -506,14 +512,12 @@ public class GunBase : MonoBehaviour
         {
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-            // 2. 右斜め上あたりに、少しランダムな力を加える……
             Vector3 force = ejectPoint.right * Random.Range(ejectForceRange.x, ejectForceRange.y) 
                         + ejectPoint.up * Random.Range(1f, 2f);
             
             rb.AddForce(force, ForceMode.Impulse);
        }
 
-        // 4. いつまでも残っていると、メモリが「ぐるぐる」しちゃうから。
         StartCoroutine(ReturnShellAfterTime(shell, 3.0f));
     }
 
@@ -530,66 +534,61 @@ public class GunBase : MonoBehaviour
         if (muzzleFlashLight == null) return;
         if (useMuzzleFlashLight == false) return;
 
-        // 1. 閃光の「誕生」。一瞬だけ、最大出力で世界を照らす……
         muzzleFlashLight.enabled = true;
         muzzleFlashLight.intensity = maxIntensity;
 
-        // 2. 閃光の「死」。0.05秒後に、光を消し去る残酷な魔法（コルーチン）を放つ。
         StartCoroutine(ExtinguishFlash());
     }
 
-    // 閃光を消し去るための、遅延実行（コルーチン）
     private IEnumerator ExtinguishFlash()
     {
-        // ごく短い「命の時間」を待って……
         yield return new WaitForSeconds(flashDuration);
     
-        // ライトを黙らせる（無音への回帰）。
         if (muzzleFlashLight != null)
         {
             muzzleFlashLight.enabled = false;
         }
    }
 
-   // Update() の中で入力を監視して、ね
    void HandleADS()
    {
         if(isNPC){return;}
 
         if(isReloading)
         {
-            // リロードが始まった瞬間に「狙い込み中」だったら、1回だけ解除処理を呼ぶんだ、よ
             if (isAiming)
             {
                 isAiming = false;
                 crosshair.SetVisible(true);
                 PlayADSTween(defaultGunPosition, defaultFOV, defaultGunRotation);
+
+                foreach (var p in pManager.activePassives.ToArray())
+                {
+                    p.OnADSEnd(pManager);
+                }
             }
             return;
         }
 
-        // 右クリックを押している間は「覗き込む」
         if (Input.GetMouseButtonDown(1))
         {
             isAiming = true;
             crosshair.SetVisible(false);
             PlayADSTween(adsPosition, adsFieldOfView,adsRotation);
             
-    
-            foreach (var p in pManager.activePassives)
+            foreach (var p in pManager.activePassives.ToArray())
             {
                 p.OnADSStart(pManager);
             }
         }
     
-        // 離せば「腰だめ」に戻る
         if (Input.GetMouseButtonUp(1))
         {
             crosshair.SetVisible(true);
             isAiming = false;
             PlayADSTween(defaultGunPosition, defaultFOV,defaultGunRotation);
 
-            foreach (var p in pManager.activePassives)
+            foreach (var p in pManager.activePassives.ToArray())
             {
                 p.OnADSEnd(pManager);
             }
@@ -598,17 +597,12 @@ public class GunBase : MonoBehaviour
 
     void PlayADSTween(Vector3 targetPos, float targetFOV,Vector3 targetLotate)
     {
-        // 銃の位置を「しなやか」に動かす
         adsPivot.DOLocalMove(targetPos, adsSpeed).SetEase(Ease.OutQuad);
         adsPivot.DOLocalRotate(targetLotate, adsSpeed).SetEase(Ease.OutQuad);
     
-        // カメラの視野角も変えて、集中力を表現するんだ、ね
         playerCamera.DOFieldOfView(targetFOV, adsSpeed).SetEase(Ease.OutQuad);
     }
 
-    
-
-    // このスクリプトのtryFireから呼び出される、よ
     IEnumerator tryReload()
     {
         if(isReloading) yield break;
@@ -617,11 +611,10 @@ public class GunBase : MonoBehaviour
         
         if(!isNPC && reloadAnimation)
         {
-           foreach (var p in pManager.activePassives)
+           foreach (var p in pManager.activePassives.ToArray())
            {
                p.OnBeforeReload(pManager);
            }
-            //アニメーションの中で「currentAmmo = maxAmmoかReloadCountAnimation」と「isReloding=false」する、よ
             reloadAnimation.Play(this);
         }
         else
@@ -633,7 +626,7 @@ public class GunBase : MonoBehaviour
 
     public void OnMagazineEjected()
     {
-        currentAmmo = 0;
+        _currentAmmo = 0;
         UpdateAmmoDisplay();
     }
 
@@ -642,105 +635,113 @@ public class GunBase : MonoBehaviour
         
         if (!isNPC)
         {
-            currentAmmo = maxAmmo;
+            _currentAmmo = maxAmmo;
             UpdateAmmoDisplay();
         }
         else
         {
-            currentAmmo = baseMaxAmmo;
+            _currentAmmo = baseMaxAmmo;
         }
         isReloading = false;
         
-        if (pManager != null && pManager.activePassives != null && !isNPC)
+        if (pManager != null && pManager.activePassives!= null && !isNPC)
         {
-            foreach (var p in pManager.activePassives)
+            foreach (var p in pManager.activePassives.ToArray())
             {
                 p.OnReloadComplete(pManager);
             }
         }
     }
 
+   private Coroutine ammoChangeCoroutine;
+   private int targetAnimatedAmmo;
 
-    private Coroutine reloadCountCoroutine;
-
-    public void StartReloadCountAnimation(float restTime)
+public void StartReloadCountAnimation(float restTime)
 {
-    if (reloadCountCoroutine != null)
+    if (ammoChangeCoroutine != null)
     {
-        StopCoroutine(reloadCountCoroutine);
+        StopCoroutine(ammoChangeCoroutine);
     }
 
-    reloadCountCoroutine = StartCoroutine(ReloadCountAnimation(restTime));
+    ammoChangeCoroutine = StartCoroutine(AmmoChangeAnimation(currentAmmo, maxAmmo, restTime));
 }
 
 public void StopReloadCountAnimation()
 {
-    if (reloadCountCoroutine == null) return;
-
-    StopCoroutine(reloadCountCoroutine);
-    reloadCountCoroutine = null;
-}
-    IEnumerator ReloadCountAnimation(float reloadTime)
+    if (ammoChangeCoroutine != null)
     {
-        reloadTime = Mathf.Max(0f, reloadTime);
+        StopCoroutine(ammoChangeCoroutine);
+        ammoChangeCoroutine = null;
+    }
+}
 
-        int displayAmmo = currentAmmo;
-        float interval = reloadTime / maxAmmo;
+IEnumerator AmmoChangeAnimation(int startAmmo, int targetAmmo, float duration)
+{
+    int currentDisplay = startAmmo;
+    int diff = targetAmmo - startAmmo;
+    
+    if (diff <= 0) 
+    {
+        UpdateAmmoDisplay();
+        yield break;
+    }
 
-        if (interval <= 0)
-        {
-            UpdateAmmoDisplay();
-            reloadCountCoroutine = null;
-            yield break;
-        }
+    float interval = duration / diff;
 
-        while (displayAmmo < maxAmmo)
-        {
-            displayAmmo++;
-            ammoText.text = $"{displayAmmo} / {maxAmmo}";
-
-            if (ammoBeltUI != null)
-            {
-                ammoBeltUI.SynchronizeAmmoUI(displayAmmo, maxAmmo, isReloading, ammoText.color);
-            }
-
-            yield return new WaitForSeconds(interval);
-        }
-
-        currentAmmo = maxAmmo;
+    while (currentDisplay < targetAmmo)
+    {
+        currentDisplay++;
+        _currentAmmo = currentDisplay; 
+        
         UpdateAmmoDisplay();
 
-        reloadCountCoroutine = null;
+        yield return new WaitForSeconds(interval);
     }
 
-    
-    //弾が変化した時に呼び出される、ね...
-    public void UpdateAmmoDisplay()
+    ammoChangeCoroutine = null;
+}
+
+public void AddAmmoAnimated(int amountToAdd, float duration)
+{
+    if (ammoChangeCoroutine != null)
     {
-        if(isNPC){return;}
-
-        if (ammoText != null)
-        {
-            ammoText.text = $"{currentAmmo} / {maxAmmo}";
-
-            if (currentAmmo <= maxAmmo * 0.1)
-            {
-                ammoText.color = pManager.LowTextColor; 
-            }
-            else if (currentAmmo <= maxAmmo * 0.5f)
-            {
-                ammoText.color = pManager.HarfTextColor;
-            }
-            else 
-            {
-                ammoText.color = pManager.DefaultTextColor;
-            }
-
-            // ★ここを追加：通常の弾数変化、残弾補正による色変化をベルトUIに同期
-            if (ammoBeltUI != null)
-            {
-                ammoBeltUI.SynchronizeAmmoUI(currentAmmo, maxAmmo, isReloading, ammoText.color);
-            }
-        }
+        StopCoroutine(ammoChangeCoroutine);
     }
+    else
+    {
+        targetAnimatedAmmo = currentAmmo;
+    }
+    
+    targetAnimatedAmmo += amountToAdd;
+    
+    ammoChangeCoroutine = StartCoroutine(AmmoChangeAnimation(currentAmmo, targetAnimatedAmmo, duration));
+}
+
+public void UpdateAmmoDisplay()
+{
+if(isNPC){return;}
+
+if (ammoText != null)
+{
+ammoText.text = $"{currentAmmo} / {maxAmmo}";
+
+if (currentAmmo <= maxAmmo * 0.1)
+{
+ammoText.color = pManager.LowTextColor;
+}
+else if (currentAmmo <= maxAmmo * 0.5f)
+{
+ammoText.color = pManager.HarfTextColor;
+}
+else
+{
+ammoText.color = pManager.DefaultTextColor;
+}
+
+if (ammoBeltUI != null)
+{
+ammoBeltUI.SynchronizeAmmoUI(currentAmmo, maxAmmo, isReloading, ammoText.color);
+}
+}
+}
 }

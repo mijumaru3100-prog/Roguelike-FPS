@@ -14,7 +14,7 @@ public class SkirmisherAI : EnemyAI
 
     private bool _isFleeingState = false;
     private float _originalStoppingDistance = 0f;
-    private float _originalSpeed = 3.5f; // 通常時の速度を保存する変数
+    private float _originalSpeed = 3.5f;
 
     protected override void Start()
     {
@@ -23,7 +23,7 @@ public class SkirmisherAI : EnemyAI
         {
             agent.updateRotation = false;
             _originalStoppingDistance = agent.stoppingDistance;
-            _originalSpeed = agent.speed; // 初期設定の速度を保存
+            _originalSpeed = agent.speed;
         }
     }
 
@@ -31,30 +31,26 @@ public class SkirmisherAI : EnemyAI
     {
         if (canSee)
         {
-            // 1. 下がるべきかどうかの状態（ステート）を管理
             if (!_isFleeingState && dist < fleeTriggerDistance)
             {
-                // トリガー距離より近づかれたら「退避状態」開始
                 _isFleeingState = true;
                 if (agent != null)
                 {
                     agent.stoppingDistance = 0f;
-                    agent.speed = fleeSpeed; // 下がるときの速度に変更
+                    agent.speed = fleeSpeed;
                 }
             }
             else if (_isFleeingState && dist > fleeStopDistance)
             {
-                // 十分に離れたら「退避状態」終了
                 _isFleeingState = false;
                 if (agent != null)
                 {
                     agent.stoppingDistance = _originalStoppingDistance;
-                    agent.speed = _originalSpeed; // 通常時の速度に戻す
-                    agent.ResetPath(); // 停止
+                    agent.speed = _originalSpeed;
+                    agent.ResetPath();
                 }
             }
 
-            // 2. 状態に応じた移動処理
             if (_isFleeingState)
             {
                 Flee();
@@ -69,14 +65,13 @@ public class SkirmisherAI : EnemyAI
         }
         else
         {
-            // プレイヤーが見えない場合は追跡する
             if (_isFleeingState)
             {
                 _isFleeingState = false;
                 if (agent != null)
                 {
                     agent.stoppingDistance = _originalStoppingDistance;
-                    agent.speed = _originalSpeed; // 通常時の速度に戻す
+                    agent.speed = _originalSpeed;
                 }
             }
             if (agent != null) agent.destination = target.position;

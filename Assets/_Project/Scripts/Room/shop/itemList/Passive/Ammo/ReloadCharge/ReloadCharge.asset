@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e98ed831e549e450e8457386c9cd167b, type: 3}
   m_Name: ReloadCharge
   m_EditorClassIdentifier: Assembly-CSharp::ReloadCharge
-  passiveName: ReloadCharge
+  passiveName: "\u8056\u306A\u308B\u9285\u50CF"
   price: 100
   detailtext: "\u30EA\u30ED\u30FC\u30C9\u5F8C\u3001\uFF12\u767A\u6253\u3064\u307E\u3067\u30C0\u30E1\u30FC\u30B8+50%"
-  icon: {fileID: 21300000, guid: 0d0252f8314ad415eb9f6ec3211a3a34, type: 3}
-  model: {fileID: 250814867785974999, guid: 83cdce4c1fa474578919344d32661993, type: 3}
+  icon: {fileID: 21300000, guid: 046ffe5f5c8b74e969c6c0ac09990397, type: 3}
+  model: {fileID: 4202319334592780642, guid: 06576893957c84db48988cd8afc8e3fa, type: 3}
   canStack: 0
   usecount: 0
   remainCount: 0

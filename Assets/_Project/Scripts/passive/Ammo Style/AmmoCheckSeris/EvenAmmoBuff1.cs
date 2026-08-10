@@ -6,29 +6,40 @@ public class EvenAmmoBuff: PassiveEffect
     public float DamageMultipleBuff;
     public float WeakBonusBuff;
     public float ReloadSpeedBuff;
-    
-
-    private bool Isrunning = false;
 
     public override void OnGetThisPassive(PlayerManager manager)
     {
-        Isrunning = false;
+        if(manager.currentWeapon.currentAmmo % 2  == 0)
+        {
+            running = true;
+        }
+        else
+        {
+            running = false;
+        }
     }
 
     public override void OnReloadComplete(PlayerManager manager)
     {
-        Isrunning = false; 
+        if(manager.currentWeapon.currentAmmo % 2  == 0)
+        {
+            running = true;
+        }
+        else
+        {
+            running = false;
+        }
     }
 
     public override void OnShotComplete(PlayerManager manager)
     {
         if(manager.currentWeapon.currentAmmo % 2  == 0)
         {
-            Isrunning = true;
+            running = true;
         }
         else
         {
-            Isrunning = false;
+            running = false;
         }
     }
 
@@ -36,29 +47,29 @@ public class EvenAmmoBuff: PassiveEffect
     {
         if(manager.currentWeapon.currentAmmo % 2  == 0)
         {
-            Isrunning = true;
+            running = true;
         }
         else
         {
-            Isrunning = false;
+            running = false;
         }
     }
     // ステータス倍率 //(GunBase)   
     public override float GetDamageMultiplier(PlayerManager manager)
     {
-        if(Isrunning) return DamageMultipleBuff;
+        if(running) return DamageMultipleBuff;
         else return 0;
     }
     
     public override float GetWeakPointBonus(PlayerManager manager)
     {
-        if(Isrunning) return WeakBonusBuff;
+        if(running) return WeakBonusBuff;
         else return 0;
     }
 
     public override float GetReloadSpeedMultiplier(PlayerManager manager)
     {
-        if(Isrunning) return ReloadSpeedBuff;
+        if(running) return ReloadSpeedBuff;
         else return 0;
     } 
 }

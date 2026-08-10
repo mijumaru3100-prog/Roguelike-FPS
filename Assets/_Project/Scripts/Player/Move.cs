@@ -8,7 +8,6 @@ public class Move:MonoBehaviour
     private Vector3 currentHorizontalVelocity;
     private Vector3 VerticalVelocity;
 
-    // 移動しているかどうか（外部から取得可能）
     public bool isMoving => currentHorizontalVelocity.magnitude > 0.05f;
 
     //ここでステータス
@@ -26,10 +25,6 @@ public class Move:MonoBehaviour
     public bool canNotWark = false;
     public bool canNotJump = false;
 
-
-
-
- 
   void Update()
  {
     currentHorizontalVelocity_changer();
@@ -45,27 +40,32 @@ if (transform.position.y < -100f)
 
 public void ResetPosition() 
 {
-// 1. キャラクターコントローラーを一旦止める
     CharacterController controller = GetComponent<CharacterController>();
     if (controller != null) controller.enabled = false;
 
-    // 2. 速度（慣性）をリセットする（Rigidbodyを使っている場合）
     Rigidbody rb = GetComponent<Rigidbody>();
     if (rb != null) rb.linearVelocity = Vector3.zero;
 
-    // 3. 座標をリスポーン地点に合わせる
-    // .position を代入します
     transform.position = pManager.dungeonManager.currentRoomScript.respawnPoint.transform.position;;
 
-    // 4. コントローラーを再起動
     if (controller != null) controller.enabled = true;
 }
  public float inputX,inputZ;
 
-// このスクリプトのUpdateから呼び出される、よ
 void currentHorizontalVelocity_changer()
 {
-    if(canNotWark) return;
+    if (canNotWark)
+    {
+        inputX = 0f;
+        inputZ = 0f;
+
+        if (controller.isGrounded)
+        {
+            currentHorizontalVelocity = Vector3.Lerp(currentHorizontalVelocity, Vector3.zero, warkAccelaration * 2f * Time.deltaTime);
+            if (currentHorizontalVelocity.magnitude < 0.05f) currentHorizontalVelocity = Vector3.zero;
+        }
+        return;
+    }
 
     inputX = Input.GetAxis("Horizontal");
     inputZ = Input.GetAxis("Vertical");
@@ -75,7 +75,6 @@ void currentHorizontalVelocity_changer()
 
     bool hasInput = moveDirection.sqrMagnitude > 0.01f;
 
-    // 停止専用
     if (!hasInput && controller.isGrounded)
     {
         currentHorizontalVelocity = Vector3.Lerp(currentHorizontalVelocity,Vector3.zero,warkAccelaration * 2f * Time.deltaTime);
@@ -104,7 +103,6 @@ void currentHorizontalVelocity_changer()
 }
 
    //nowAccerarationの計算に使う
-   // このスクリプトのcurrentHorizontalVelocity_changerから呼び出される、よ
    public float yarukiChecker(Vector3 moveDirection)
    {
     float yaruki = 0;
@@ -129,7 +127,6 @@ void currentHorizontalVelocity_changer()
     return yaruki;
    }
 
- // このスクリプトのUpdateから呼び出される、よ
  void VerticalVelocity_controller()
  {
     if(canNotJump) return;
@@ -157,7 +154,7 @@ void currentHorizontalVelocity_changer()
     {
         VerticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity * (1+pManager.sharedStats.JumpHeightMultiple));
 
-        foreach (var p in pManager.activePassives)
+        foreach (var p in pManager.activePassives.ToArray())
         {
             p.OnJump(pManager);
         }
