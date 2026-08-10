@@ -1,3 +1,5 @@
+
+
 # Roguelike FPS
 
 ## ゲーム概要
@@ -14,7 +16,9 @@ Unity / C#で開発している3DローグライクFPSです。
 
 ## プレイ動画
 
-https://github.com/user-attachments/assets/33667362-4dbf-4551-a228-3964d535dbbf
+https://github.com/user-attachments/assets/eb638d51-8f8f-4c69-84d7-f25b5daa3c56
+
+https://github.com/user-attachments/assets/d1766d56-2a39-4851-b84a-db42ab4f4575
 
 ## 技術的に力を入れた点
 
