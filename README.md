@@ -1,24 +1,31 @@
-
-
 # Roguelike FPS
 
 ## ゲーム概要
 
-Unity / C#で開発している3DローグライクFPSです。
-「Enter the Gungeon」「Slay the Spire」から着想を得て、ランダムに選ばれた部屋を攻略しながら、武器やパッシブアイテムを組み合わせてビルドを構築し、ボス撃破を目指します。
+Unity / C# で開発している3DローグライクFPSです。
 
-現在も個人で開発を続けています。
+「Enter the Gungeon」「Slay the Spire」から着想を得て、ランダムに選ばれた部屋を攻略しながら、武器やパッシブアイテム、武器Modifierを組み合わせてビルドを構築し、ボス撃破を目指します。
+
+現在も個人で開発を続けており、ゲームバランスの調整や最終コンテンツの実装を進めています。
 
 ## 開発環境
 
-* Unity
-* C#
+- Unity
+- C#
 
 ## プレイ動画
 
 https://github.com/user-attachments/assets/eb638d51-8f8f-4c69-84d7-f25b5daa3c56
 
 https://github.com/user-attachments/assets/d1766d56-2a39-4851-b84a-db42ab4f4575
+
+## 主なゲームシステム
+
+- **武器システム**：射撃方式や弾種、リロード方式の異なる武器を使用可能
+- **パッシブシステム**：ランダムな3択からパッシブを入手し、組み合わせによって能力を強化
+- **武器Modifier**：武器に特殊な能力を付与し、性能や射撃特性を変化
+- **ショップ**：ゲーム内通貨を使用して武器Modifierなどを購入
+- **武器ドロップ**：敵を倒して新しい武器を入手
 
 ## 技術的に力を入れた点
 
@@ -38,11 +45,14 @@ https://github.com/user-attachments/assets/d1766d56-2a39-4851-b84a-db42ab4f4575
 
 ## 主要なソースコード
 
-* [GunBase.cs](Assets/_Project/Scripts/Weapons/Gunbase.cs)
+- [GunBase.cs](Assets/_Project/Scripts/Weapons/Gunbase.cs)  
   武器の基底処理
-* [PassiveEffect.cs](Assets/_Project/Scripts/passive/PassiveEffect.cs)
+
+- [PassiveEffect.cs](Assets/_Project/Scripts/passive/PassiveEffect.cs)  
   パッシブ効果の基底クラス
-* [PlayerStats.cs](Assets/_Project/Scripts/Player/stats.cs)
+
+- [PlayerStats.cs](Assets/_Project/Scripts/Player/stats.cs)  
   プレイヤーのステータス管理
-* [PlayerManager.cs](Assets/_Project/Scripts/Player/PlayerManager.cs)
+
+- [PlayerManager.cs](Assets/_Project/Scripts/Player/PlayerManager.cs)  
   各システムの連携管理
