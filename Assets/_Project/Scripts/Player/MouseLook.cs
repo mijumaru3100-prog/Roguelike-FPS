@@ -4,6 +4,7 @@ public class MouseLook : MonoBehaviour
 {
     public Transform playerBody; 
     public Transform handPoint; 
+    public PlayerManager pManager;
 
     [HideInInspector] public float mouseX;
     [HideInInspector] public float mouseY;
@@ -42,14 +43,9 @@ public class MouseLook : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
     void Update()
     {
+        if(pManager.isDead)return;
         if (Time.timeScale == 0) return;
 
         HandleRecoilRecovery();

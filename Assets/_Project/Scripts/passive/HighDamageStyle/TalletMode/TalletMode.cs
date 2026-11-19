@@ -16,7 +16,7 @@ public class TaletMode : PassiveEffect
     }
     private IEnumerator WaitTime(PlayerStats stats)
     {
-        for(int i = 0; i < maxCount+1; i++)
+        for(int i = 0; i < maxCount; i++)
         {
             yield return new WaitForSeconds(buffCoolTime);
             stats.ApplyModifier(buffStats, true);

@@ -40,7 +40,7 @@ public class HealShop : MonoBehaviour
     {
         if (isInside && PlayerBuyText != null && buyTextData != null)
         {  
-            float heal = healAmount / 2; 
+            float heal = healAmount; 
             buyTextData.text = "Press E to buy Heal " + heal.ToString() + " for " + price.ToString();
         }
     }

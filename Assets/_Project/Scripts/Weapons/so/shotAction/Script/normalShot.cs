@@ -22,25 +22,36 @@ public class normalshotAction : shotAction
             endPos = hit.point;
             MakeHitEffect(baseGun.pManager, hit, ray.direction);
             
+
+
+
             EnemyHP targetHealth = hit.collider.GetComponentInParent<EnemyHP>();
 
-            if (targetHealth != null && !baseGun.isNPC)
+            ShootableObject ShootableObject = hit.collider.GetComponentInParent<ShootableObject>();
+
+
+            if (targetHealth != null && baseGun.AI == null)
             {
                 targetHealth.OnHitBullet(baseGun.damage, hit.collider); 
+                targetHealth.ApplyKnockback(ray.direction, baseGun.knockbackForce);
                 baseGun.pManager.crosshair.OnHit();
+            }
+            else if(ShootableObject != null)
+            {
+                ShootableObject.Attacked(hit.collider,ray.direction,baseGun.knockbackForce);
             }
             else
             {
                 MakeHitMark(baseGun.pManager, hit, ray.direction);
+                foreach(var p in baseGun.pManager.activePassives)
+                {
+                p.OnMiss(baseGun.pManager);
+                }
             }
         }
         else
         {
             endPos = ray.origin + (ray.direction * 100f);
-            foreach(var p in baseGun.pManager.activePassives)
-            {
-                p.OnMiss(baseGun.pManager);
-            }
         }
 
         if (baseGun.pManager.tracerPool != null)

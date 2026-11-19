@@ -3,12 +3,13 @@ using DG.Tweening;
 [CreateAssetMenu(menuName = "Gun/PartAction/Move")]
 public class PartsMove : GunPartAction
 {
-    public Vector3 targetPos;       
-    public Vector3 targetRot;       
-    public float duration = 0.05f;  
-    public float returnTime = 0.1f; 
-    public Ease easeType = Ease.OutQuad;
-    public bool isFinalShotCancel = false;
+    [Header("パーツ移動・回転設定")]
+    [Tooltip("発砲時の移動量（ローカル）")] public Vector3 targetPos;       
+    [Tooltip("発砲時の回転量（ローカル角度）")] public Vector3 targetRot;       
+    [Tooltip("移動にかかる時間")] public float duration = 0.05f;  
+    [Tooltip("元の位置に戻る時間")] public float returnTime = 0.1f; 
+    [Tooltip("イージング種別")] public Ease easeType = Ease.OutQuad;
+    [Tooltip("最後の1発を撃った時に位置を戻さないか（スライドオープン等）")] public bool isFinalShotCancel = false;
     public override void Execute(GunBase gun, GameObject part, Vector3 defaultPos, Vector3 defaultRot)
     {
         if (part == null) return;

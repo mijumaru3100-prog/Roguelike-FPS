@@ -27,6 +27,8 @@ public class Move:MonoBehaviour
 
   void Update()
  {
+    if(pManager.isDead)return;
+    
     currentHorizontalVelocity_changer();
     VerticalVelocity_controller();
     Vector3 velocity = currentHorizontalVelocity + VerticalVelocity;

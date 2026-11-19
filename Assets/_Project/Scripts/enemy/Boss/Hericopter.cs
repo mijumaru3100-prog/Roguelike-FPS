@@ -2,18 +2,15 @@ using UnityEngine;
 using System.Collections;
 using DG.Tweening;
 
-public class Hericopter : MonoBehaviour
+public class Hericopter : EnemyAI
 {
-    public enum ActionState { Idle, MachineGun }
+    public enum ActionState { Idle, MachineGun,Missile}
     
-    [Header("現在の状態")]
-    public ActionState currentState = ActionState.Idle;
+    [Header("現在のアクション状態")]
+    public ActionState currentActionState = ActionState.Idle;
     
-    [Header("共通設定")]
-    public PlayerManager pManager;
-    public Transform target;
+    [Header("共通設定 (EnemyAI由来)")]
     public Transform model;
-    public EnemyHP HP;
     
     [Header("射撃（移動）設定")]
     public float AttackShiftTime;
@@ -32,8 +29,15 @@ public class Hericopter : MonoBehaviour
     public Transform R_muzzlePoint;
     private Transform NextMuzzle ;
     public float spreadAngle = 30;
-    public int damage = 1; 
-    public float bulletSpeed = 10;
+
+    [Header("ミサイル")]
+public GameObject missileWarningPrefab;
+public GameObject missilePrefab;
+public Transform missileSpawnPoint;
+
+public int missileCount = 3;
+public float missileRadius = 5f;
+public float missileInterval = 0.3f;
 
     [Header("回転設定")]
     public float rotationSpeed = 4f;
@@ -46,7 +50,8 @@ public class Hericopter : MonoBehaviour
 
     private void Start() 
     {
-        currentState = ActionState.Idle;
+        currentActionState = ActionState.Idle;
+        isChangingState = false;
         if (model != null) defaultWorldPosition = model.position;
 
         NextMuzzle = L_muzzlePoint;
@@ -60,11 +65,13 @@ public class Hericopter : MonoBehaviour
     //lookPos.y = model.position.y;
 
     model.LookAt(lookPos);
+    L_muzzlePoint.LookAt(lookPos);
+    R_muzzlePoint.LookAt(lookPos);
 }
 
     private void Update() 
     {
-        switch (currentState)
+        switch (currentActionState)
         {
             case ActionState.Idle:
                 Idle();
@@ -73,25 +80,34 @@ public class Hericopter : MonoBehaviour
             case ActionState.MachineGun:
                 MachineGunAttack();
                 break;
+
+            case ActionState.Missile:
+                MissileAttack();
+                break;
         }
     }
 
     IEnumerator ChangeNextState(float time)
+{
+    yield return new WaitForSeconds(time);
+
+    switch (currentActionState)
     {
-        yield return new WaitForSeconds(time);
-        
-        switch (currentState)
-        {
-            case ActionState.Idle:
-                currentState = ActionState.MachineGun;
-                break;
-            
-            case ActionState.MachineGun:
-                currentState = ActionState.Idle;
-                break;
-        }
-        isChangingState = false;
+        case ActionState.Idle:
+            currentActionState = ActionState.MachineGun;
+            break;
+
+        case ActionState.MachineGun:
+            currentActionState = ActionState.Missile;
+            break;
+
+        case ActionState.Missile:
+            currentActionState = ActionState.Idle;
+            break;
     }
+
+    isChangingState = false;
+}
 
     public void Idle()
     {
@@ -193,12 +209,6 @@ public class Hericopter : MonoBehaviour
         b.transform.rotation = NextMuzzle.rotation * spreadRotation;
         
         bullet bulletScript = b.GetComponent<bullet>();
-        if(bulletScript != null)
-        {
-            bulletScript.damage = damage;
-            bulletScript.pManager = pManager;
-            bulletScript.bulletSpeed = bulletSpeed;
-        }
 
         if(NextMuzzle == L_muzzlePoint)
         {
@@ -209,6 +219,77 @@ public class Hericopter : MonoBehaviour
             NextMuzzle = L_muzzlePoint;
         }
     }
+
+    public void MissileAttack()
+{
+    if (isChangingState) return;
+
+    isChangingState = true;
+
+    StartCoroutine(MissileAttackCoroutine());
+}
+
+IEnumerator MissileAttackCoroutine()
+{
+    // 1発目：必ずプレイヤーの現在位置
+    Vector3 targetPos = target.position;
+
+    CreateMissileWarning(targetPos);
+    LaunchMissile(targetPos);
+
+    yield return new WaitForSeconds(missileInterval);
+
+    // 残りはプレイヤー周辺にランダム配置
+    for (int i = 1; i < missileCount; i++)
+    {
+        Vector2 random = Random.insideUnitCircle * missileRadius;
+
+        targetPos = target.position + new Vector3(
+            random.x,
+            0f,
+            random.y
+        );
+
+        CreateMissileWarning(targetPos);
+        LaunchMissile(targetPos);
+
+        yield return new WaitForSeconds(missileInterval);
+    }
+
+    yield return new WaitForSeconds(2f);
+
+    isChangingState = false;
+    currentActionState = ActionState.Idle;
+}
+
+void CreateMissileWarning(Vector3 targetPos)
+{
+    GameObject warning = Instantiate(
+        missileWarningPrefab,
+        targetPos,
+        Quaternion.identity
+    );
+
+    MissileWarning warningScript =
+        warning.GetComponent<MissileWarning>();
+
+    warningScript.Initialize(targetPos,pManager,target.transform);
+}
+
+public void LaunchMissile(Vector3 targetPosition)
+{
+    GameObject missile =
+        Instantiate(
+            missilePrefab,
+            missileSpawnPoint.position,
+            missileSpawnPoint.rotation
+        );
+
+    HelicopterMissile missileScript =
+        missile.GetComponent<HelicopterMissile>();
+
+    missileScript.SetTarget(targetPosition);
+}
 
     public void DrawAttackPath(Transform start, Transform end, Color color)
 {
@@ -227,4 +308,57 @@ public void OnDrawGizmos()
     DrawAttackPath(AttckPoint_3A, AttckPoint_3B, Color.blue);
 }
     
+    public override void OnDie()
+    {
+        StartCoroutine(OnDieCoroutine());
+    }
+
+    private IEnumerator OnDieCoroutine()
+    {
+        if (currentState == EnemyState.Dead) yield break;
+
+        currentState = EnemyState.Dead;
+
+        StopCoroutine("RecoverFromDamage");
+        
+        if (body != null)
+        {
+            body.transform.DOKill(); 
+        }
+
+        if (collider != null) collider.enabled = false;
+        
+        // 弱点コライダーをすべて無効化する
+        if (HP != null && HP.weakPointColliders != null)
+        {
+            foreach (var col in HP.weakPointColliders)
+            {
+                if (col != null) col.enabled = false;
+            }
+        }
+
+        Debug.Log(gameObject.name + " has died.");
+
+        if (pManager != null && pManager.coinPool != null)
+        {
+            GameObject c = pManager.coinPool.Get();
+            c.transform.position = transform.position;
+            c.transform.rotation = transform.rotation;
+            Coin CoinScript = c.GetComponent<Coin>();
+            if (CoinScript != null)
+            {
+                CoinScript.moneyAmount = CoinAmount;
+                CoinScript.manager = pManager;
+            }
+        }
+
+        Time.timeScale = 0.2f;
+
+        yield return new WaitForSecondsRealtime(3f);
+
+        Time.timeScale = 1f;
+
+        Destroy(gameObject);
+    }
+
 }

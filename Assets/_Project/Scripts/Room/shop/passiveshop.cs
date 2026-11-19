@@ -8,7 +8,7 @@ public class passiveshop : MonoBehaviour
     public GameObject barrier;
     [Header("Item Data")]
     public PassiveDatabase itempool;
-    public PassiveShopEntry selected;
+    private PassiveEffect  effect;
     private GameObject model;
     [Header("UI")]
     public TextMeshPro nameText;
@@ -21,10 +21,22 @@ public class passiveshop : MonoBehaviour
     private bool used = false;
     private bool isInside = false; 
 
+    void Awake()
+    {
+        // Fetch references early so ShopSetting() called externally before Start() doesn't crash
+        if (manager == null)
+        {
+            manager = FindObjectOfType<PlayerManager>();
+        }
+        if (manager != null)
+        {
+            PlayerBuyText = manager.PlayerBuyText;
+            buyTextData = manager.buyTextData;
+        }
+    }
+
     void Start()
     {
-        PlayerBuyText = manager.PlayerBuyText;
-        buyTextData = manager.buyTextData;
         ShopSetting();
     }
 
@@ -46,17 +58,17 @@ public class passiveshop : MonoBehaviour
         used = false; 
         ResetShop();
         
-        selected = itempool.GetRandom(manager);
-        if (selected == null) return;
+        effect = itempool.GetRandom(manager);
+        if (effect == null) return;
 
-        nameText.text = selected.effect.passiveName;
-        priceText.text = selected.effect.price.ToString();
-        detailText.text = selected.effect.detailtext;
+        nameText.text = effect.passiveName;
+        priceText.text = effect.price.ToString();
+        detailText.text = effect.detailtext;
 
         if (model != null) Destroy(model);
         if (modelSpawnPos != null)
         {
-            model = Instantiate(selected.effect.model, modelSpawnPos);
+            model = Instantiate(effect.model, modelSpawnPos);
             model.transform.localPosition = Vector3.zero;
             model.transform.localScale = Vector3.one;
             model.transform.LookAt(manager.transform.position);
@@ -71,7 +83,7 @@ public class passiveshop : MonoBehaviour
     public void ResetShop()
     {
         if (barrier != null) barrier.SetActive(true);
-        PlayerBuyText.SetActive(false);
+        if (PlayerBuyText != null) PlayerBuyText.SetActive(false);
     }
 
     void UpdateBuyText()
@@ -79,7 +91,7 @@ public class passiveshop : MonoBehaviour
         if (PlayerBuyText != null && !used)
         {
             PlayerBuyText.SetActive(true);
-            buyTextData.text = "Press E to buy for " + selected.effect.price.ToString();
+            buyTextData.text = "Press E to buy for " + effect.price.ToString();
         }
     }
 
@@ -98,32 +110,17 @@ public class passiveshop : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isInside = false;
-            PlayerBuyText.SetActive(false);
+            if (PlayerBuyText != null) PlayerBuyText.SetActive(false);
         }
     }
 
     public void buy()
     {
-        if (selected == null || used) return;
+        if (effect == null || used) return;
         
-        if (manager.TrySpendMoney(selected.effect.price))
+        if (manager.TrySpendMoney(effect.price))
         {
-            if (selected.effect != null) manager.AddPassive(selected.effect);
-            if (selected.additionalEffects != null)
-            {
-                foreach (var extra in selected.additionalEffects)
-                {
-                    if (extra != null) manager.AddPassive(extra);
-                }
-            }
-            if (selected.statBuff != null)
-            {
-                manager.sharedStats.ApplyModifier(selected.statBuff, true);
-                if (manager.currentWeapon != null) manager.currentWeapon.UpdateAmmoDisplay();
-                
-                PlayerHP hp = manager.GetComponent<PlayerHP>();
-                if (hp != null) hp.SyncMaxHPWithStats();
-            }
+            if (effect != null) manager.AddPassive(effect);
 
             used = true;
             if (barrier != null) barrier.SetActive(false);

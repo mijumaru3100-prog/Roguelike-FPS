@@ -12,7 +12,7 @@ public class PrefabshotAction : shotAction
             bullet bulletScript = b.GetComponent<bullet>();
             if(bulletScript != null)
             {
-                if(!baseGun.isNPC)
+                if(baseGun.AI == null)
                 {
                    bulletScript.damage = baseGun.damage;
                 }

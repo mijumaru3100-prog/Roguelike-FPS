@@ -8,6 +8,7 @@ public class BuffFlug : MonoBehaviour
 
 
 
+
     public void FlugReset()
     {
         IsOneShotKill = false;

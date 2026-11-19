@@ -23,6 +23,5 @@ MonoBehaviour:
   running: 1
   buffStats: {fileID: 11400000, guid: 721efaaa56b7d49c8828995a1749ae10, type: 2}
   damagebuffMultiple: 0
-  fireratebuffMultiple: 0
-  buffCount: 0
+  fireratebuffMultiple: 0.05
   maxbuffCount: 5

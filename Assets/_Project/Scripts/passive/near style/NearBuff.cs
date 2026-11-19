@@ -15,6 +15,7 @@ public class NearBuff: PassiveEffect
     //manager.RemovePassive(this);
 
     public PlayerStats buffStats;
+    private bool IsBuff = false;
     //manager.sharedStats.ApplyModifier(buffStats, true)
     //[SerializeField] private float buffDuration = 1.5f;
 
@@ -30,12 +31,18 @@ public class NearBuff: PassiveEffect
 
     public override void OnEnemyNear(PlayerManager manager)
     {
+        IsBuff = true;
         manager.sharedStats.ApplyModifier(buffStats, true);
     }
     
     public override void OnEnemyAway(PlayerManager manager)
     {
-        manager.sharedStats.ApplyModifier(buffStats, false);
+        if (IsBuff ==true)
+        {
+            manager.sharedStats.ApplyModifier(buffStats, false);            
+            IsBuff = false;
+        }
+
     }
     
 }

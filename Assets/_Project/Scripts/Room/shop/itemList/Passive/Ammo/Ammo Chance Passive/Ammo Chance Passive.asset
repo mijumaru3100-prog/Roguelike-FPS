@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AmmoChancePassive
   passiveName: "\u9B54\u5C0E\u30DE\u30AC\u30B8\u30F3"
   price: 100
-  detailtext: "\u5C04\u6483\u547D\u4E2D\u6642\u306B30%\u3067\u6B8B\u5F3E\uFF0B\uFF11"
+  detailtext: "\u5C04\u6483\u547D\u4E2D\u6642\u306B20%\u3067\u6B8B\u5F3E\uFF0B\uFF11"
   icon: {fileID: 21300000, guid: 994575ca2de0440c4aa23f3b593c083e, type: 3}
   model: {fileID: 3857545845724454934, guid: 6e77586ad5dd540e99330dc0495a22aa, type: 3}
   canStack: 1
   usecount: 0
   remainCount: 0
   running: 1
-  chance: 0.3
+  chance: 0.2

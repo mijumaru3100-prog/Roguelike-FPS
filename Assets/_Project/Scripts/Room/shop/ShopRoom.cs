@@ -7,6 +7,7 @@ public class ShopRoom : Stage
     [SerializeField]private List<StatsShop> StatsShops = new List<StatsShop>();
     [SerializeField]private List<weaponshop> weaponshops = new List<weaponshop>();
     [SerializeField]private List<passiveshop> passiveshops = new List<passiveshop>();
+    [SerializeField]private List<AbilityShop> abilityShops = new List<AbilityShop>();
     void Start()
     {
         ResetShops();
@@ -29,12 +30,17 @@ public class ShopRoom : Stage
 
         foreach(var shop in weaponshops)
         {
-            if(shop != null) shop.ShopSetting();
+            if(shop != null) shop.Set();
         }
 
         foreach(var shop in  passiveshops)
         {
             if(shop != null) shop.ShopSetting();
+        }
+
+        foreach(var shop in abilityShops)
+        {
+            if(shop != null) shop.Set();
         }
     }
 }

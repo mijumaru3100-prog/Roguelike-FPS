@@ -91,6 +91,16 @@ public class AmmoBeltUI : MonoBehaviour
         bool shouldShake = !isReloading && currentAmmo < maxAmmo;
         float speed = isReloading ? 0.1f : moveDuration; 
         
+        if (!gameObject.activeInHierarchy)
+        {
+            // Can't run coroutines on inactive objects — snap directly
+            if (bulletGrid != null)
+            {
+                bulletGrid.anchoredPosition = new Vector2(targetX, bulletGrid.anchoredPosition.y);
+            }
+            return;
+        }
+
         moveCoroutine = StartCoroutine(AnimateBelt(targetX, speed, shouldShake));
     }
 

@@ -12,6 +12,7 @@ public class PlayerHP : MonoBehaviour
     private int lastMaxHP; 
     private int _currentHP;
     public int  currentHP => _currentHP;
+    public GameOverManager GameOverManager;
     
     [Tooltip("DOTweenで滑らかに変動させる表示用のHP")]
     public float displayHP; 
@@ -120,17 +121,23 @@ public class PlayerHP : MonoBehaviour
 
 public void TakeDamage(int damage)
 {
-    if (isInvincible) return;
+    if (pManager.isDead || isInvincible) return;
     _currentHP = Mathf.Clamp(_currentHP - damage, 0, maxHP);
     UpdateHPUI(_currentHP);
     barRect.DOShakeAnchorPos(0.15f, new Vector2(6f, 0f), 20);
 
     if (_currentHP > 0)
     {
+        WeaponAbility currentAbility = pManager.currentAbility != null ? pManager.currentAbility : (pManager.currentWeapon != null ? pManager.currentWeapon.ability : null);
+        if (currentAbility != null) currentAbility.OnDamaged();
         PlayDamageEffect();
         GrantInvincibility(invincibleTime, false);
     }
-    else { Debug.Log("death"); }
+    else
+    {
+        pManager.isDead = true;
+        GameOverManager.GameOver();
+    }
     
     foreach (var p in pManager.activePassives.ToArray()) p.OnGetDamage(pManager);
 }

@@ -3,15 +3,25 @@ using System.Collections;
 public class bullet : MonoBehaviour
 {
     public float baseBulletSpeed = 5;
-    public float bulletSpeed;
+    private float bulletSpeed;
     public float baseLifeTime = 5f;
-   public float lifeTime;
+   private float lifeTime;
     public int baseThrouthCount = 1;
-    public int currentThrouthCount;
+    private int currentThrouthCount;
     public int damage = 1;
     public PlayerManager pManager;
-    void OnEnable()
+    public ParticleSystem effect; 
+    public Light light;
+    public int FlashIntensity;
+    [SerializeField] private Collider bulletCollider;
+    
+    private bool isHit = false;
+        protected virtual void OnEnable()
     {
+        if(bulletCollider != null) bulletCollider.enabled = true;
+        if(effect != null)effect.Play();
+        isHit = false;
+        
         //if (pManager != null && pManager.sharedStats != null)
         //{
         //    bulletSpeed = (baseBulletSpeed + pManager.sharedStats.bonusBulletSpeed) * pManager.sharedStats.bulletSpeedMultiple;
@@ -34,11 +44,12 @@ public class bullet : MonoBehaviour
     }
     void Update()
     {
-        transform.Translate(Vector3.forward * bulletSpeed * Time.deltaTime);
+        if(!isHit)transform.Translate(Vector3.forward * bulletSpeed * Time.deltaTime);
     }
-    void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
         if (other.isTrigger) return;
+        isHit = true;
         
         EnemyHP EnemyHealth = other.GetComponentInParent<EnemyHP>();
         PlayerHP PlayerHealth = other.GetComponentInParent<PlayerHP>();
@@ -66,19 +77,46 @@ public class bullet : MonoBehaviour
             DeactivateBullet();
         }
     }
-    private void DeactivateBullet()
-    {
-        if (pManager != null && pManager.bulletPool != null)
-        {
-            pManager.bulletPool.ReturnToPool(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+
+protected void DeactivateBullet()
+{
+    StartCoroutine(DeactivateRoutine());
+}
+
+private IEnumerator DeactivateRoutine()
+{
+    isHit = true;
+    bulletCollider.enabled = false;
+
+    if(light != null)yield return StartCoroutine(FlashLight());
+
+    if (pManager != null && pManager.bulletPool != null)
+        pManager.bulletPool.ReturnToPool(gameObject);
+    else
+        Destroy(gameObject);
+}
     void OnDisable()
     {
         StopAllCoroutines();
     }
+
+    private IEnumerator FlashLight()
+{
+    light.enabled = true;
+    light.intensity = FlashIntensity;
+
+    yield return new WaitForSeconds(0.03f);
+
+    float elapsed = 0f;
+
+    while (elapsed < 0.1f)
+    {
+        elapsed += Time.deltaTime;
+        light.intensity = Mathf.Lerp(FlashIntensity, 0f, elapsed / 0.1f);
+        yield return null;
+    }
+
+    light.intensity = 0f;
+    light.enabled = false;
+}
 }

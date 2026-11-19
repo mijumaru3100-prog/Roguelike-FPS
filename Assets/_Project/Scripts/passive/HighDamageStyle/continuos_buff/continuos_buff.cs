@@ -5,25 +5,28 @@ public class continuos_buff : PassiveEffect
     [SerializeField] private PlayerStats buffStats;
     [SerializeField] private float damagebuffMultiple;
     [SerializeField] private float fireratebuffMultiple;
-    [SerializeField] private int buffCount;
     [SerializeField] private int maxbuffCount = 5;
     public override float GetDamageMultiplier(PlayerManager manager)
     {
-        return damagebuffMultiple * buffCount;
+        return damagebuffMultiple * remainCount;
     }
     public override float GetFireRateMultiplier(PlayerManager manager)
     {
-        return fireratebuffMultiple * buffCount;
+        return fireratebuffMultiple * remainCount;
     }
     public override void OnHitBullet(PlayerManager manager ,float damage, EnemyHP hp)
     {
-        if (buffCount < maxbuffCount)
+        if (remainCount < maxbuffCount)
         {
-            buffCount ++;
+            remainCount++;
         }
     }
     public override void OnMiss(PlayerManager manager)
     {
-            buffCount = 0;
+        remainCount = 0;
+    }
+    public override void OnGetThisPassive(PlayerManager manager)
+    {
+        remainCount = 0;
     }
 }

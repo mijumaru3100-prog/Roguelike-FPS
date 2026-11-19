@@ -8,7 +8,7 @@ public class Guillotine: PassiveEffect
     {
         if(enemyHP.CurrentHP-damage < enemyHP.maxHP * HPRate)
         {
-            enemyHP.TakeDamage(enemyHP.CurrentHP,null);
+            enemyHP.TakeDamage(enemyHP.CurrentHP,DamageType.Passive);
         }
     }
 }

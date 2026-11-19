@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Max HP Buff
   m_EditorClassIdentifier: Assembly-CSharp::MaxHPBuff
   passiveName: "\u92ED\u5F3E\u85AC"
-  price: 50
-  detailtext: "\u4F53\u529B\u6700\u5927\u306E\u6575\u306B\u4E0E\u3048\u308B\u30C0\u30E1\u30FC\u30B8\uFF0B1%"
+  price: 150
+  detailtext: "\u4F53\u529B\u6700\u5927\u306E\u6575\u306B\u4E0E\u3048\u308B\u30C0\u30E1\u30FC\u30B8\uFF0B25%"
   icon: {fileID: 21300000, guid: aeaaaa2faa51741be8f1538886dcd4a4, type: 3}
   model: {fileID: 2819822499772870974, guid: 4d7bfdcc023f641038ebd6d82e04556d, type: 3}
   canStack: 1
   usecount: 0
   remainCount: 0
   running: 1
-  DamageMultipleBuff: 0.15
+  DamageMultipleBuff: 0.25
   WeakBonusBuff: 0

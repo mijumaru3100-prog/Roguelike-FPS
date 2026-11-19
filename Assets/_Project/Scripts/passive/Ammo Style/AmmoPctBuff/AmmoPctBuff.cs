@@ -28,13 +28,13 @@ public class AmmoPctBuff : PassiveEffect
         float ammoPercent = (float)manager.currentWeapon.currentAmmo / manager.currentWeapon.maxAmmo;
         if (triggerWhenHigher)
         {
-            return ammoPercent >= buffAmmoThreshold;
-            running =  ammoPercent >= buffAmmoThreshold;
+            running = ammoPercent >= buffAmmoThreshold;
+            return running;
         }
         else
         {
-            return ammoPercent <= buffAmmoThreshold;
-            running =  ammoPercent <= buffAmmoThreshold;
+            running = ammoPercent <= buffAmmoThreshold;
+            return running;
         }
     }
     public override void OnGetThisPassive(PlayerManager manager)

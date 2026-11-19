@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class SniperAI : EnemyAI
+public class SniperAI : NormalEnemyAI
 {
     public GameObject Razer;
     

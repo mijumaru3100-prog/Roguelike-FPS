@@ -3,8 +3,13 @@ using DG.Tweening;
 [CreateAssetMenu(menuName = "Gun/Action/P_shotGun")]
 public class P_shotGunAction : shotAction
 { 
+    [Header("ショットガン設定 (プレハブ弾)")]
+    [Tooltip("発射されるペレット数"), Range(1, 32)]
     public int palletCount = 8; 
+
+    [Tooltip("弾の拡散角度"), Range(0f, 45f)]
     public float spreadAngle = 10.0f; 
+
     public override void shot(GunBase baseGun)
     {
         for(int i=0;i<palletCount ;i++)
@@ -27,7 +32,7 @@ public class P_shotGunAction : shotAction
         bullet bulletScript = b.GetComponent<bullet>();
         if(bulletScript != null)
         {
-            if(!baseGun.isNPC)
+            if(baseGun.AI == null)
             {
                 bulletScript.damage = baseGun.damage;
             }

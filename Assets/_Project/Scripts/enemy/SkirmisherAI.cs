@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class SkirmisherAI : EnemyAI
+public class SkirmisherAI : NormalEnemyAI
 {
     [Header("スカーミッシャー固有設定")]
     [Tooltip("この距離より近づかれたら下がり始めます")]

@@ -9,38 +9,54 @@ public class LeaveShot : PassiveEffect
 
     private Coroutine currentBuffCoroutine;
     public override void OnBeforeShot(PlayerManager manager)
+{
+    if (currentBuffCoroutine != null)
     {
-        if (currentBuffCoroutine != null)
-        {
-            manager.StopCoroutine(currentBuffCoroutine);
-            currentBuffCoroutine = null;
-
-            if (running)
-            {
-                manager.sharedStats.ApplyModifier(Stats, false);
-                running = false;
-            }
-        }
-
-        currentBuffCoroutine = manager.StartCoroutine(HandleLeaveTime(manager));
-    }
-
-    private IEnumerator HandleLeaveTime(PlayerManager manager)
-    {
-        // manager.sharedStats.ApplyModifier(Stats, true);
-        // running = true;
-
-        yield return new WaitForSeconds(LeaveTime);
-
-        manager.sharedStats.ApplyModifier(Stats, true);
-        running = true;
-
+        manager.StopCoroutine(currentBuffCoroutine);
         currentBuffCoroutine = null;
     }
 
-    public override void OnGetThisPassive(PlayerManager manager)
+    
+
+    currentBuffCoroutine = manager.StartCoroutine(HandleLeaveTime(manager));
+}
+
+public override void OnShotComplete(PlayerManager manager)
+{
+    if (currentBuffCoroutine != null)
     {
+        manager.StopCoroutine(currentBuffCoroutine);
         currentBuffCoroutine = null;
-        running = false;
     }
+
+    SetBuff(manager, false);
+}
+
+private IEnumerator HandleLeaveTime(PlayerManager manager)
+{
+    yield return new WaitForSeconds(LeaveTime);
+
+    currentBuffCoroutine = null;
+    SetBuff(manager, true);
+}
+
+public override void OnGetThisPassive(PlayerManager manager)
+{
+    if (currentBuffCoroutine != null)
+    {
+        manager.StopCoroutine(currentBuffCoroutine);
+        currentBuffCoroutine = null;
+    }
+
+    manager.sharedStats.ApplyModifier(Stats, true);
+    running = true;
+}
+
+private void SetBuff(PlayerManager manager, bool active)
+{
+    if (running == active) return;
+
+    manager.sharedStats.ApplyModifier(Stats, active);
+    running = active;
+}
 }

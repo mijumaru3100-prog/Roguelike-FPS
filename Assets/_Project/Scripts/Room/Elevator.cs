@@ -3,8 +3,8 @@ using DG.Tweening;
 using System.Collections.Generic;
 public class Elevator : MonoBehaviour
 {
-    public Transform defaultPosition;
-    public Transform thisRoomTargetPosition; 
+    [Header("Movement")]
+    public Vector3 moveOffset = new Vector3(0, 10f, 0); 
     public float durationThisRoom = 2.0f;
     public float durationNextRoom = 2.0f;
 public List<ElevatorDoor> Enterdoors;
@@ -46,6 +46,15 @@ public List<ElevatorDoor> Exitdoors;
 
     public bool DontRoomTypeChange =false;
 
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+
+    void Awake()
+    {
+        initialPosition = transform.position;
+        initialRotation = transform.rotation;
+    }
+
     void Update()
     {
         if (isGoing && ridingPlayer != null)
@@ -67,24 +76,28 @@ public List<ElevatorDoor> Exitdoors;
             float dist = Vector3.Distance(transform.position, playerTransform.position);
             if (dist > resetDistance)
             {
-            Debug.Log("Player moved away. Auto-resetting...");
-                if(nextStage.wall != null) nextStage.wall.SetActive(true);
-                ResetStage(); 
+                Debug.Log("Player moved away. Auto-resetting...");
+                if (nextStage != null && nextStage.wall != null) nextStage.wall.SetActive(true);
                 playerTransform = null; 
+                DOVirtual.DelayedCall(1.0f, () => ResetStage());
             }
         }
     }
     public void Go(GameObject player)
     {
         if (isGoing || isUsed) return;
+        if (dungeonManager == null) dungeonManager = DungeonManager.Instance;
         isGoing = true;
         nextRoom = dungeonManager.SelectRoom(nextRoomType);
         if (nextRoom != null)
         {
             nextStage = nextRoom.GetComponent<Stage>();
         }
-        nextStage.ResetStage();
-        nextStage.StartStage();
+        if (nextStage != null)
+        {
+            nextStage.ResetStage();
+            nextStage.StartStage();
+        }
 
         player.transform.SetParent(transform);
         ridingPlayer = player;
@@ -99,9 +112,9 @@ public List<ElevatorDoor> Exitdoors;
                 moveAudio.volume = 1f; 
                 moveAudio.Play();
             }
-            nextStage.wall.SetActive(false);
+            if (nextStage != null && nextStage.wall != null) nextStage.wall.SetActive(false);
         });
-        seq.Append(transform.DOMove(thisRoomTargetPosition.position, durationThisRoom).SetEase(Ease.InQuad));
+        seq.Append(transform.DOMove(transform.position + moveOffset, durationThisRoom).SetEase(Ease.InQuad));
         seq.AppendCallback(() => {
             Camera.main.transform.DOShakePosition(0.2f, 0.1f);
             if (warpAudio != null) 
@@ -124,8 +137,11 @@ public List<ElevatorDoor> Exitdoors;
             CharacterController playerController = player.GetComponent<CharacterController>();
             if (playerController != null) playerController.enabled = false;
 
-            transform.position = nextStage.elevatorStartPos.position;
-            transform.rotation = nextStage.elevatorStartPos.rotation;
+            if (nextStage != null)
+            {
+                transform.position = nextStage.elevatorStartPos.position;
+                transform.rotation = nextStage.elevatorStartPos.rotation;
+            }
 
             Physics.SyncTransforms();
             if (playerController != null) playerController.enabled = true;
@@ -145,8 +161,11 @@ public List<ElevatorDoor> Exitdoors;
             barrier.SetActive(false);
             DOVirtual.DelayedCall(0.5f, () => ExitDoors_OpenDoors());
 
-            dungeonManager.AdvanceFloor();
-            dungeonManager.FloorCount.CountUpdate();
+            if (dungeonManager != null)
+            {
+                dungeonManager.AdvanceFloor();
+                if (dungeonManager.FloorCount != null) dungeonManager.FloorCount.CountUpdate();
+            }
         });
     }
     public void EnterDoors_OpenDoors() { foreach(var door in Enterdoors) door.Open(); }
@@ -155,6 +174,7 @@ public List<ElevatorDoor> Exitdoors;
     public void ExitDoors_CloseDoors() { foreach(var door in Exitdoors) door.Close(); }
     void Start()
     {
+        if (dungeonManager == null) dungeonManager = DungeonManager.Instance;
         EnterDoors_OpenDoors();
         ResetStage();
     }
@@ -167,26 +187,25 @@ public List<ElevatorDoor> Exitdoors;
         }
     }
     public void ResetStage()
-{
-    DOVirtual.DelayedCall(1.0f, () => {
-        transform.position = defaultPosition.position;
-        transform.rotation = defaultPosition.rotation;
+    {
+        if (isGoing) return;
+        if (dungeonManager == null) dungeonManager = DungeonManager.Instance;
+
+        transform.position = initialPosition;
+        transform.rotation = initialRotation;
         ExitDoors_CloseDoors();
         EnterDoors_OpenDoors();
         
-        if(!DontRoomTypeChange)
+        if (!DontRoomTypeChange && dungeonManager != null)
         {
             nextRoomType = dungeonManager.GetNextRoomType();
         }
-        nextRoom = dungeonManager.SelectRoom(nextRoomType);
-        if (nextRoom != null) nextStage = nextRoom.GetComponent<Stage>();
             
         EffectChange();
 
         isUsed = false; 
-        Debug.Log($"Elevator ready. Current Floor: {dungeonManager.currentFloor}, Next: {nextRoomType}");
-    });
-}
+        Debug.Log($"Elevator ready. Current Floor: {(dungeonManager != null ? dungeonManager.currentFloor : 0)}, Next: {nextRoomType}");
+    }
 
     public void EffectChange()
     {

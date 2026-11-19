@@ -1,8 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
-public class PassiveItemUI : MonoBehaviour
+
+public class PassiveItemUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public Image iconImage;
     public TextMeshProUGUI stackCountText;
@@ -11,11 +13,16 @@ public class PassiveItemUI : MonoBehaviour
     public Color activeColor = Color.white;
     public Color inactiveColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
-    public void Setup(PassiveEffect passive)
-    {
-        iconImage.sprite = passive.icon;
-    }
+    private PassiveEffect passive;
+private PassiveDescriptionUI descriptionUI;
 
+    public void Setup(PassiveEffect passive, PassiveDescriptionUI descriptionUI)
+{
+    this.passive = passive;
+    this.descriptionUI = descriptionUI;
+
+    iconImage.sprite = passive.icon;
+}
     public void UpdateDisplay(int stackCount, PassiveEffect passive)
     {
         iconImage.color = passive.running ? activeColor : inactiveColor;
@@ -40,4 +47,14 @@ public class PassiveItemUI : MonoBehaviour
             remainCountText.gameObject.SetActive(false);
         }
     }
+
+   public void OnPointerEnter(PointerEventData eventData)
+{
+    descriptionUI.ShowPassive(passive);
+}
+
+public void OnPointerExit(PointerEventData eventData)
+{
+    descriptionUI.ShowDefault();
+}
 }

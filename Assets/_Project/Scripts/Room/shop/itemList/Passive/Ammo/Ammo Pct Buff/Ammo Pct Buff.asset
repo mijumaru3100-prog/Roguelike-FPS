@@ -20,7 +20,7 @@ MonoBehaviour:
   canStack: 0
   usecount: 0
   remainCount: 0
-  running: 1
+  running: 0
   damagebuff: 0.3
   fireratebuff: 0
   buffAmmoThreshold: 0.7

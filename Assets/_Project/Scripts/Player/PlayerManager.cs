@@ -2,13 +2,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using TMPro;
-
+ using UnityEngine.UI;
+using DG.Tweening;
 using IEnumerator = System.Collections.IEnumerator;
 
 public class PlayerManager : MonoBehaviour
 {
     public GameObject Player;
     public PlayerHP playerHP;
+    public bool isDead = false;
     
     public GunBase currentWeapon;
     public Transform weaponHolder;
@@ -56,9 +58,29 @@ public class PlayerManager : MonoBehaviour
     public ObjectPool tracerPool;
     public ObjectPool coinPool;
     public ObjectPool BulletMarkPool;
+    public ObjectPool explosionBulletPool;
+    public ObjectPool flashbulletPool;
     public Material[] bulletHoleMats;
 
     public ObjectPool HitEffectPool;
+     public ObjectPool HealPool;
+    public GameObject dropWeapon;
+    public List<WeaponAbility> DropAbilitys = new List<WeaponAbility>();
+    [Header("装備中アビリティ")]
+    [SerializeField] private WeaponAbility _currentAbility;
+    public event Action<WeaponAbility> OnAbilityChanged;
+    public WeaponAbility currentAbility
+    {
+        get => _currentAbility;
+        set
+        {
+            _currentAbility = value;
+            OnAbilityChanged?.Invoke(_currentAbility);
+        }
+    }
+
+
+    public bool IsTitle;
 
     void Awake()
     {
@@ -81,6 +103,11 @@ public class PlayerManager : MonoBehaviour
             currentWeapon.adsPivot = adsPivot;
             currentWeapon.recoilPivot = recoilPivot;
             currentWeapon.UpdateAmmoDisplay();
+
+            if (currentAbility == null && currentWeapon.ability != null)
+            {
+                currentAbility = currentWeapon.ability;
+            }
         }
 
         sharedStats.pManager = this;
@@ -95,23 +122,23 @@ public class PlayerManager : MonoBehaviour
         }
 
         GameObject newWeaponObj = Instantiate(newWeaponPrefab, weaponHolder);
-        
+
         currentWeapon = newWeaponObj.GetComponent<GunBase>();
         if (currentWeapon != null)
         {
             newWeaponObj.transform.localPosition = currentWeapon.offsetPosition;
             newWeaponObj.transform.localRotation = Quaternion.Euler(currentWeapon.offsetRotation);
-            currentWeapon.pManager = this;
-            currentWeapon.stats = sharedStats;
-            currentWeapon.ammoBeltUI = ammoBeltUI; 
-            currentWeapon.ammoText = ammoTextUI;  
+            currentWeapon.pManager     = this;
+            currentWeapon.stats        = sharedStats;
+            currentWeapon.ammoBeltUI   = ammoBeltUI;
+            currentWeapon.ammoText     = ammoTextUI;
             currentWeapon.playerCamera = mainCamera;
-            currentWeapon.adsPivot = adsPivot;
-            currentWeapon.recoilPivot = recoilPivot;
+            currentWeapon.adsPivot     = adsPivot;
+            currentWeapon.recoilPivot  = recoilPivot;
 
             currentWeapon.UpdateAmmoDisplay();
         }
-        
+
         Debug.Log("武器を変更しました：" + newWeaponObj.name);
     }
 
@@ -283,4 +310,25 @@ public class PlayerManager : MonoBehaviour
         countCoroutine = null;
     }
 
+    [SerializeField] private Image flashImage;
+
+    public void Flash(float duration)
+    {
+        flashImage.DOKill();
+
+        Color color = flashImage.color;
+        color.a = 1f;
+        flashImage.color = color;
+
+        Sequence seq = DOTween.Sequence();
+
+        // 一瞬で白くする
+        seq.Append(flashImage.DOFade(1f, 0.05f));
+
+        // 白い状態を維持
+        seq.AppendInterval(duration);
+
+        // 徐々に視界を戻す
+        seq.Append(flashImage.DOFade(0f, 1f));
+    }
 }

@@ -6,7 +6,7 @@ public class ObjectPool : MonoBehaviour
     [SerializeField] private int initialSize = 20; 
 
     public bool isDebug = false;
-    private Queue<GameObject> pool = new Queue<GameObject>();
+    protected Queue<GameObject> pool = new Queue<GameObject>();
     void Awake()
     {
         for (int i = 0; i < initialSize; i++)
@@ -14,15 +14,19 @@ public class ObjectPool : MonoBehaviour
             CreateNewObject();
         }
     }
-    private GameObject CreateNewObject()
-    {
-        GameObject obj = Instantiate(prefab);
-        obj.transform.SetParent(this.transform); 
-        obj.SetActive(false);
-        pool.Enqueue(obj);
-        return obj;
-    }
-    public GameObject Get()
+    
+
+
+protected GameObject CreateNewObject()
+{
+    GameObject obj = Instantiate(prefab);
+    obj.transform.SetParent(transform);
+    obj.SetActive(false);
+    pool.Enqueue(obj);
+    return obj;
+}
+
+    public virtual GameObject Get()
     {
         if(isDebug){Debug.Log("よび出された....");}
         if (pool.Count == 0)

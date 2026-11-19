@@ -20,6 +20,11 @@ public class WeaponBobbing : MonoBehaviour
 
     [Header("停止慣性")]
     public float stopKickAmount = 0.015f;
+
+    [Header("足音")]
+[SerializeField] private AudioSource footstepSource;
+[SerializeField] private AudioClip[] footstepClips;
+[SerializeField] private AudioClip LandingSound;
     
 
     private float timer = 0f;
@@ -35,38 +40,48 @@ public class WeaponBobbing : MonoBehaviour
         gun = pManager.currentWeapon;
         defaultPosition = transform.localPosition;
     }
-    void Update()
+    private float previousSin;
+
+void Update()
+{
+    Bobbing();
+    Rotation();
+
+    Footstep();
+
+    if (!playerMovement.isMoving)
+{
+    previousSin = Mathf.Sin(timer);
+    Reset();
+}
+
+    if (!wasGrounded && playerMovement.controller.isGrounded)
+{
+    landingOffset = -0.05f;
+    PlayLandingSound();
+}
+
+    wasGrounded = playerMovement.controller.isGrounded;
+
+    landingOffset = Mathf.Lerp(
+        landingOffset,
+        0f,
+        Time.deltaTime * 10f
+    );
+
+    if (wasMoving && !playerMovement.isMoving)
     {
-        Bobbing();
-        Rotation();
-        if (!playerMovement.isMoving) 
-            Reset();
-
-        if (!wasGrounded && playerMovement.controller.isGrounded)
-        {
-            landingOffset = -0.05f;
-        }
-        wasGrounded = playerMovement.controller.isGrounded;
-        
-        landingOffset = Mathf.Lerp(
-            landingOffset,
-            0f,
-            Time.deltaTime * 10f
-        );
-
-        if (wasMoving && !playerMovement.isMoving)
-        {
-            stopOffset = stopKickAmount;
-        }
-        
-        stopOffset = Mathf.Lerp(
-            stopOffset,
-            0f,
-            Time.deltaTime * 8f
-        );
-
-        wasMoving = playerMovement.isMoving;
+        stopOffset = stopKickAmount;
     }
+
+    stopOffset = Mathf.Lerp(
+        stopOffset,
+        0f,
+        Time.deltaTime * 8f
+    );
+
+    wasMoving = playerMovement.isMoving;
+}
 
     void Bobbing()
     {
@@ -155,4 +170,40 @@ public class WeaponBobbing : MonoBehaviour
         Time.deltaTime * tiltSmooth
         );
     }
+
+    void Footstep()
+{
+    bool grounded = playerMovement.controller.isGrounded;
+
+    if (!playerMovement.isMoving || !grounded)
+    {
+        previousSin = Mathf.Sin(timer);
+        return;
+    }
+
+    float currentSin = Mathf.Sin(timer);
+
+    if (previousSin < 0f && currentSin >= 0f)
+    {
+        PlayFootstep();
+    }
+
+    previousSin = currentSin;
+}
+
+void PlayFootstep()
+{
+    if (footstepSource == null || footstepClips.Length == 0)
+        return;
+
+    AudioClip clip = footstepClips[Random.Range(0, footstepClips.Length)];
+
+    footstepSource.pitch = Random.Range(0.95f, 1.05f);
+    footstepSource.PlayOneShot(clip);
+}
+
+void PlayLandingSound()
+{
+    footstepSource.PlayOneShot(LandingSound);
+}
 }

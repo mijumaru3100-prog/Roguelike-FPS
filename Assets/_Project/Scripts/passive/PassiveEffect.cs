@@ -22,6 +22,9 @@ public abstract class PassiveEffect : ScriptableObject
     public virtual void OnGetThisPassive(PlayerManager manager) { }
     public virtual void OnGetPassive(PlayerManager manager) { }
 
+    //武器取得(Pmanager)
+    public virtual void OnChangeWeapon(PlayerManager manager) {}
+
     // 更新 //(Pmanager)
     public virtual void OnUpdate(PlayerManager manager) { }
     public virtual void OnFixedUpdate(PlayerManager manager) { }

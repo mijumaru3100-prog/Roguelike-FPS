@@ -5,13 +5,14 @@ using DG.Tweening;
 public class ParticleCharge : reloadAnimation
 {
     [Header("基準となる時間（1.0倍の時）")]
-    public float originalTiltTime = 0.5f;
-    public float originalChargeTime = 0.4f;
+    [Tooltip("銃を傾ける時間")] public float originalTiltTime = 0.5f;
+    [Tooltip("チャージ時間")] public float originalChargeTime = 0.4f;
 
     [Header("リロードモーション設定")]
-    public Vector3 tiltAngle;
+    [Tooltip("リロード時の銃の傾き角度")] public Vector3 tiltAngle;
       
-    public AudioClip ChargeClip;      
+    [Header("効果音設定")]
+    [Tooltip("チャージ音")] public AudioClip ChargeClip;      
 
     public override void Play(GunBase gun)
     {
@@ -29,6 +30,8 @@ public class ParticleCharge : reloadAnimation
 
         Color originalColor = mat.color;
         mat.SetColor("_EmissionColor", Color.black);
+
+        gun.PlayReloadSound(ChargeClip);
 
         Sequence seq = DOTween.Sequence();
 

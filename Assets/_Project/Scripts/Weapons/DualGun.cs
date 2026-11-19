@@ -8,9 +8,9 @@ using Random = UnityEngine.Random;
 
 public class DualGun : GunBase
 {
-    [Header("DualSetting")]
-    public Transform muzzlePoint1;
-    public Transform muzzlePoint2;
+    [Header("=== 二丁拳銃設定 (Dual Gun Settings) ===")]
+    [Tooltip("第1銃口位置")] public Transform muzzlePoint1;
+    [Tooltip("第2銃口位置")] public Transform muzzlePoint2;
 
     protected override void Start()
     {
@@ -43,7 +43,7 @@ public class DualGun : GunBase
 
     protected override void fire()
     {
-       if(isNPC == false)
+       if(AI == null)
         {
             foreach (var p in pManager.activePassives.ToArray())
             {
@@ -51,7 +51,7 @@ public class DualGun : GunBase
             }
         }
         
-        if (shotAction == null && isNPC == false) 
+        if (shotAction == null && AI == null) 
         {
             Debug.Log("shotactionが未設定...だ、よ。ままならないね...");
             return;
@@ -63,18 +63,22 @@ public class DualGun : GunBase
         _currentAmmo --;
         lastFireTime = Time.time;
 
-        if(isNPC == false)
+        if(AI == null)
         {
             UpdateAmmoDisplay();
             ApplyGunRecoil();
         }
 
+        if (ability != null && AI == null)
+        ability.SpecialShot(this);
+        else
         shotAction.shot(this);
+        
         currentHeat += heatPerShot;
         PlayShotSound();
         PlayMuzzleFlash();
         
-        if(!isNPC)
+        if(AI == null)
         {
             foreach (var set in gunPartSets)
             {

@@ -2,7 +2,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ReloadCharge", menuName = "Passives/AmmoStyle/Reloadcharges")]
 public class ReloadCharge : PassiveEffect
 {
-    [SerializeField]private int CurrentCount;       
     [SerializeField]private int MaxCount = 5;
     [SerializeField]private int IncreaseCount = 5;
 

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c2502a5e5eec445cb6c9df81831acc7, type: 3}
   m_Name: Player Stats
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  pManager: {fileID: 0}
   bonusMaxAmmo: 0
   bonusMaxHP: 0
   bonusDamage: 0

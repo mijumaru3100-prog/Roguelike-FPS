@@ -1,0 +1,323 @@
+using UnityEngine;
+using UnityEngine.AI;
+using System.Collections;
+using DG.Tweening;
+
+public abstract class NormalEnemyAI : EnemyAI
+{
+    [Header("射撃・スナイパー設定")]
+    public GunBase gun;
+    public float keepDistance = 10f;
+    public LayerMask obstacleLayer;
+    [Header("射撃設定")]
+    public float fireRate = 0.5f;
+    [Header("エイム設定")]
+    public bool showAimDebug = false;
+    public float aimHeightOffset = 0f;
+    public float myEyeHeight = 1.5f;
+    public float shootingAngleThreshold = 20f;
+    [Header("回転設定")]
+    [Tooltip("旋回スピード（値が小さいほどゆっくり回転します）")]
+    public float rotationSpeed = 4f;
+    
+    public float detectionRange = 20f;
+
+   public NavMeshAgent agent;
+   public GameObject stunObject;
+   public AudioClip WrnigSound;
+   public AudioSource AudioSource;
+
+   [SerializeField] private float attackWarningTime = 0.5f;
+   [SerializeField] private ParticleSystem attackWarningEffect;
+private bool isAttackWarning;
+public Coroutine attackCoroutine;
+
+    protected Animator anim;
+    
+    protected MeshRenderer _renderer;
+    protected MaterialPropertyBlock _propBlock;
+    protected static readonly int _colorID = Shader.PropertyToID("_Color");
+    protected Color _originalColor;
+    
+    protected static readonly int SpeedHash = Animator.StringToHash("Speed");
+    protected static readonly int AttackHash = Animator.StringToHash("Attack");
+    protected static readonly int DamageHash = Animator.StringToHash("Damage");
+    private static readonly int DeadHash = Animator.StringToHash("Dead");
+
+    protected virtual void Start()
+    {
+        agent = GetComponent<NavMeshAgent>();
+        if (agent != null) agent.updateRotation = false;
+        anim = GetComponentInChildren<Animator>(); 
+        if (gun == null) gun = GetComponentInChildren<GunBase>();
+    }
+
+    protected virtual void Update()
+    {
+        
+
+        if (target == null || currentState != EnemyState.Normal || isStunned)
+    return;
+        float dist = Vector3.Distance(transform.position, target.position);
+        Vector3 aimTargetPos = target.position + Vector3.up * aimHeightOffset;
+        bool canSee = CanSeePlayer(aimTargetPos); 
+        HandleRotation();
+        UpdateMovement(dist, canSee);
+
+        if (anim != null)
+        {
+            float speedForAnim = 0f;
+            
+            if (agent != null && agent.hasPath && agent.remainingDistance > 0.1f && agent.velocity.sqrMagnitude > 0.1f)
+            {
+                speedForAnim = GetAnimationSpeed(dist);
+            }
+            else
+            {
+                speedForAnim = 0f;
+            }
+
+            float currentParam = anim.GetFloat(SpeedHash);
+            float smoothedSpeed = Mathf.Lerp(currentParam, speedForAnim, Time.deltaTime * 12f); 
+            anim.SetFloat(SpeedHash, smoothedSpeed);
+        }
+        
+        Vector3 dirToTarget = (target.position - transform.position).normalized;
+        float angle = Vector3.Angle(transform.forward, dirToTarget);
+        if (dist <= detectionRange)
+{
+    if (attackCoroutine == null)
+    {
+        if (!canSee || angle >= shootingAngleThreshold)
+            return;
+
+        if (gun.isReloading)
+            return;
+
+        attackCoroutine = StartCoroutine(AttackSequence());
+    }
+}
+    }
+
+    private IEnumerator AttackSequence()
+{
+    isAttackWarning = true;
+    AttackWarning();
+
+    yield return new WaitForSeconds(attackWarningTime);
+
+    isAttackWarning = false;
+
+    yield return StartCoroutine(gun.AllFire());
+
+
+    attackCoroutine = null;
+}
+    protected virtual void AttackWarning()
+    {
+        if(AudioSource!=null && WrnigSound!=null)AudioSource.PlayOneShot(WrnigSound);
+        if (attackWarningEffect != null)
+    {
+        attackWarningEffect.Play();
+    }
+    }
+
+    protected abstract void UpdateMovement(float dist, bool canSee);
+    protected abstract float GetAnimationSpeed(float currentDist);
+
+    public override void OnDamage()
+    {
+        base.OnDamage();
+        if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
+        if (anim != null) anim.SetTrigger(DamageHash);
+    }
+
+    protected override IEnumerator RecoverFromDamage(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (currentState != EnemyState.Dead)
+        {
+            currentState = EnemyState.Normal;
+            if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
+        }
+    }
+
+    protected bool CanSeePlayer(Vector3 targetUpperPos)
+    {
+        Vector3 eyePos = transform.position + Vector3.up * myEyeHeight;
+        Vector3 direction = (targetUpperPos - eyePos).normalized;
+        RaycastHit hit;
+        int mask = ~LayerMask.GetMask("Ignore Raycast", "invisibleWall", "Enemy", "galass"); 
+        Debug.DrawRay(eyePos, direction * detectionRange, Color.red);
+        if (Physics.Raycast(eyePos, direction, out hit, detectionRange, mask, QueryTriggerInteraction.Ignore))
+        {
+            return hit.transform == target;
+        }
+        return false;
+    }
+
+    protected virtual void HandleRotation()
+    {
+        if (target == null) return;
+        //if (attackCoroutine != null) return;
+        Vector3 aimTarget = target.position + Vector3.up * aimHeightOffset;
+        if (gun != null) gun.muzzlePoint.transform.LookAt(aimTarget);
+        bool isFleeing = IsFleeing();
+        
+        if (agent != null && (isFleeing || agent.velocity.sqrMagnitude < 0.2f))
+        {
+            Vector3 targetPos = target.position;
+            targetPos.y = transform.position.y;
+            Vector3 direction = (targetPos - transform.position).normalized;
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSpeed);
+            }
+        }
+        else if (agent != null)
+        {
+            Vector3 moveDir = agent.velocity.normalized;
+            moveDir.y = 0;
+            if (moveDir != Vector3.zero)
+            {
+                Quaternion lookRot = Quaternion.LookRotation(moveDir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, Time.deltaTime * rotationSpeed);
+            }
+        }
+    }
+
+    protected virtual bool IsFleeing()
+    {
+        return false;
+    }
+
+    protected void Flee() 
+    {
+        if (agent == null) return;
+        Vector3 fleeDir = (transform.position - target.position).normalized;
+        Vector3 targetPos = transform.position + fleeDir * 5f;
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(targetPos, out hit, 5f, NavMesh.AllAreas)) agent.destination = hit.position; 
+    }
+
+    public override void OnDie()
+    {
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
+
+        if (anim != null)
+        {
+            anim.SetFloat(SpeedHash, 0);
+            anim.ResetTrigger(AttackHash);
+            anim.ResetTrigger(DamageHash);
+            anim.SetTrigger(DeadHash);
+        }
+
+        base.OnDie();
+    }
+
+    private bool isStunned;
+
+public void Stun(float duration)
+{
+    if (currentState == EnemyState.Dead)
+        return;
+
+    stunObject.SetActive(true);
+    if (attackCoroutine != null)
+    {
+        StopCoroutine(attackCoroutine);
+        attackCoroutine = null;
+    }
+
+    StartCoroutine(StunRoutine(duration));
+}
+
+private IEnumerator StunRoutine(float duration)
+{
+    isStunned = true;
+
+    if (agent != null && agent.isOnNavMesh)
+        agent.isStopped = true;
+
+    yield return new WaitForSeconds(duration);
+    stunObject.SetActive(false);
+
+    if (currentState != EnemyState.Dead)
+    {
+        isStunned = false;
+
+        if (agent != null && agent.isOnNavMesh)
+            agent.isStopped = false;
+    }
+}
+
+#if UNITY_EDITOR
+    protected virtual void OnDrawGizmos()
+    {
+        if (!showAimDebug) return;
+
+        Vector3 eyePos = transform.position + Vector3.up * myEyeHeight;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(eyePos, 0.15f);
+
+        UnityEditor.Handles.color = new Color(0f, 0.8f, 1f, 0.15f);
+        UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, detectionRange);
+
+        if (target == null)
+        {
+            DrawAimCone(eyePos, transform.forward, shootingAngleThreshold, Color.yellow);
+            return;
+        }
+
+        Vector3 targetAimPos = target.position + Vector3.up * aimHeightOffset;
+        Vector3 dirToTarget = (targetAimPos - eyePos).normalized;
+
+        int mask = ~LayerMask.GetMask("Ignore Raycast", "invisibleWall", "Enemy");
+        bool canSee = false;
+        Vector3 hitPoint = targetAimPos;
+
+        if (Physics.Raycast(eyePos, dirToTarget, out RaycastHit hit, detectionRange, mask, QueryTriggerInteraction.Ignore))
+        {
+            canSee = (hit.transform == target);
+            hitPoint = hit.point;
+        }
+
+        if (canSee)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(eyePos, targetAimPos);
+            Gizmos.DrawWireSphere(targetAimPos, 0.2f);
+        }
+        else
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(eyePos, hitPoint);
+            Gizmos.color = Color.gray;
+            Gizmos.DrawLine(hitPoint, targetAimPos);
+            Gizmos.DrawWireSphere(targetAimPos, 0.2f);
+        }
+
+        float angle = Vector3.Angle(transform.forward, (target.position - transform.position).normalized);
+        Color coneColor = (canSee && angle < shootingAngleThreshold) ? new Color(0f, 1f, 0f, 0.12f) : new Color(1f, 0.9f, 0f, 0.08f);
+        DrawAimCone(eyePos, transform.forward, shootingAngleThreshold, coneColor);
+    }
+
+    private void DrawAimCone(Vector3 origin, Vector3 forward, float angleThreshold, Color color)
+    {
+        UnityEditor.Handles.color = color;
+        Vector3 leftLimit = Quaternion.AngleAxis(-angleThreshold, Vector3.up) * forward;
+        Vector3 rightLimit = Quaternion.AngleAxis(angleThreshold, Vector3.up) * forward;
+        UnityEditor.Handles.DrawSolidArc(origin, Vector3.up, leftLimit, angleThreshold * 2f, 3f);
+        
+        UnityEditor.Handles.color = new Color(color.r, color.g, color.b, 0.7f);
+        Gizmos.color = new Color(color.r, color.g, color.b, 0.7f);
+        Gizmos.DrawLine(origin, origin + leftLimit * 3f);
+        Gizmos.DrawLine(origin, origin + rightLimit * 3f);
+    }
+#endif
+}

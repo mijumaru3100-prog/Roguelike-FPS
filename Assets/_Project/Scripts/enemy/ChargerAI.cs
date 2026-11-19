@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ChargerAI : EnemyAI
+public class ChargerAI : NormalEnemyAI
 {
     [Header("チャージャー設定")]
     [SerializeField] private bool isAggro = false;

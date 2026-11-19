@@ -8,22 +8,26 @@ public class PassiveUIManager : MonoBehaviour
     public GameObject passiveItemPrefab;
     public Transform container;
 
+    public PassiveDescriptionUI descriptionUI;
+
     private Dictionary<string, (PassiveItemUI ui, int count, PassiveEffect representative)> uiItems 
         = new Dictionary<string, (PassiveItemUI ui, int count, PassiveEffect representative)>();
 
     private float timer = 0f;
-void Update()
-{
+
+    void Update()
+    {
         foreach (var item in uiItems.Values)
         {
             item.ui.UpdateDisplay(item.count, item.representative);
         }
-    
-}
+    }
 
     public void RefreshUI()
     {
-        foreach (Transform child in container) Destroy(child.gameObject);
+        foreach (Transform child in container)
+            Destroy(child.gameObject);
+
         uiItems.Clear();
 
         var groupedPassives = pManager.activePassives.GroupBy(p => p.passiveName);
@@ -32,11 +36,13 @@ void Update()
         {
             var representative = group.First();
             int count = group.Count();
-            
+
             GameObject obj = Instantiate(passiveItemPrefab, container);
+
             PassiveItemUI ui = obj.GetComponent<PassiveItemUI>();
-            ui.Setup(representative);
-            
+
+            ui.Setup(representative, descriptionUI);
+
             uiItems.Add(group.Key, (ui, count, representative));
         }
     }

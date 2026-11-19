@@ -15,4 +15,4 @@ MonoBehaviour:
   originalTiltTime: 1
   originalChargeTime: 3.5
   tiltAngle: {x: -15, y: 0, z: 0}
-  ChargeClip: {fileID: 8300000, guid: 9ddd74d7dbb8643ec841c04e9c5c92ba, type: 3}
+  ChargeClip: {fileID: 8300000, guid: 1fd15fd69ecde4f18b6a8ca4eed02884, type: 3}

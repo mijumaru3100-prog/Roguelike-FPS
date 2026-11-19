@@ -15,6 +15,8 @@ public class Stage : MonoBehaviour
     public Transform elevatorEndPos;
 
     public RoomStyle CurrentStyle;
+    public List<GameObject> TemporalyObjects = new();
+    public List<ShootableObject> ShootableObjects;
     
     [SerializeField]
     private List<DecorationChanger> decorationChangers = new();
@@ -29,6 +31,17 @@ public class Stage : MonoBehaviour
         Debug.Log("Resetting stage");
         RoomStyleChanger();
         ChangeDecoration();
+        
+        foreach(var o in TemporalyObjects)
+        {
+            Destroy(o);
+        }
+        TemporalyObjects.Clear();
+
+        foreach(var o in ShootableObjects)
+        {
+            o.Reset();
+        }
     }
 
     public virtual void StartStage()

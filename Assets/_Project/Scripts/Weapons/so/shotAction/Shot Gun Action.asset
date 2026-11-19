@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9387f27e345e64e32823e9c7751f6374, type: 3}
   m_Name: Shot Gun Action
   m_EditorClassIdentifier: Assembly-CSharp::shotGunAction
-  palletCount: 8
-  spreadAngle: 5
+  palletCount: 12
+  spreadAngle: 10

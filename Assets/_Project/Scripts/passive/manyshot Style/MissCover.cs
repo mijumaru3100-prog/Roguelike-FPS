@@ -4,21 +4,7 @@ using System.Collections;
 [CreateAssetMenu(menuName = "Passives/ManyShotStyle/MissCover")]
 public class MissCover: PassiveEffect
 {
-
-    [SerializeField] private float buffDuration = 0.5f;
-    private float lastHitTime;
-    public override float GetDamageMultiplier(PlayerManager manager)
-    {
-        running = false;
-        if(Time.time >= lastHitTime+buffDuration)
-        {
-            return 1f;
-        }
-        else
-        {
-            return 0f;
-        }
-    }
+    public PlayerStats buffStats;
 
     public override void OnGetThisPassive(PlayerManager manager) 
     {
@@ -28,13 +14,25 @@ public class MissCover: PassiveEffect
     public override void OnMiss(PlayerManager manager)
     {
         running = true;
-        lastHitTime = Time.time;
-        manager.StartCoroutine(wait());
+        remainCount++;
+        manager.sharedStats.ApplyModifier(buffStats, true);
     }
 
-   IEnumerator wait()
+    public override void OnReloadComplete(PlayerManager manager)
     {
-        yield return new WaitForSeconds(buffDuration);
-        running = false;
+        for (int i = 0; i < remainCount; i++)
+        {
+            manager.sharedStats.ApplyModifier(buffStats, false);
+        }
+        remainCount = 0;
     }
+
+    public override void OnChangeWeapon(PlayerManager manager)
+    {
+        for (int i = 0; i < remainCount; i++)
+        {
+            manager.sharedStats.ApplyModifier(buffStats, false);
+        }
+        remainCount = 0;
+    } 
 }

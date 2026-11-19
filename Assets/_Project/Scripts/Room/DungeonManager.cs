@@ -67,9 +67,27 @@ public roomType GetNextRoomType()
                 break;
         }
         if (targetRoom == null || targetRoom.Length == 0) return null;
-        int idx = Random.Range(0, targetRoom.Length);
-        currentRoom = targetRoom[idx];
-        currentRoomScript = currentRoom.GetComponent<Stage>();
+
+        System.Collections.Generic.List<GameObject> candidateRooms = new System.Collections.Generic.List<GameObject>();
+        for (int i = 0; i < targetRoom.Length; i++)
+        {
+            if (targetRoom[i] != null && (targetRoom.Length == 1 || targetRoom[i] != currentRoom))
+            {
+                candidateRooms.Add(targetRoom[i]);
+            }
+        }
+
+        if (candidateRooms.Count == 0)
+        {
+            candidateRooms.AddRange(targetRoom);
+        }
+
+        int idx = Random.Range(0, candidateRooms.Count);
+        currentRoom = candidateRooms[idx];
+        if (currentRoom != null)
+        {
+            currentRoomScript = currentRoom.GetComponent<Stage>();
+        }
         return currentRoom;
     }
 }

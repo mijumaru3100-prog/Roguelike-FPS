@@ -5,23 +5,28 @@ using DG.Tweening;
 public class normalReload : reloadAnimation
 {
     [Header("基準となる時間（1.0倍の時）")]
-    public float baseTiltTime = 0.5f;
-    public float baseDropTime = 0.4f;
-    public float baseInsertTime = 0.5f;
-    public float baseDropToInsertTime = 0.1f; 
+    [Tooltip("銃を傾ける時間")] public float baseTiltTime = 0.5f;
+    [Tooltip("マガジンを落とす時間")] public float baseDropTime = 0.4f;
+    [Tooltip("マガジンを挿入する時間")] public float baseInsertTime = 0.5f;
+    [Tooltip("マガジン落下から挿入開始までの待ち時間")] public float baseDropToInsertTime = 0.1f; 
 
     [Header("リロードモーション設定")]
-    public Vector3 tiltAngle;
-    public Vector3 dropDistance;
-    public Vector3 spawnPoint; 
-    public float shakeStrength;
+    [Tooltip("リロード時の銃の傾き角度")] public Vector3 tiltAngle;
+    [Tooltip("マガジンの落下距離")] public Vector3 dropDistance;
+    [Tooltip("新マガジンの出現位置")] public Vector3 spawnPoint; 
+    [Tooltip("シェイク強度")] public float shakeStrength;
 
-    public Vector3 handMagazinePoint;
+    [Tooltip("リロード時の腕の位置")]
+    [UnityEngine.Serialization.FormerlySerializedAs("handMagazinePoint")]
+    public Vector3 ArmMagazinePoint;
+
+    [Tooltip("リロード時の手首の回転補正")]
     public Vector3 tekubiHandMagazineRotation;
 
-    public AudioClip magOutClip;    
-    public AudioClip magInsertClip; 
-    public AudioClip magHitClip;    
+    [Header("効果音設定")]
+    [Tooltip("マガジン取り出し音")] public AudioClip magOutClip;    
+    [Tooltip("マガジン挿入音")] public AudioClip magInsertClip; 
+    [Tooltip("マガジン叩き込み音")] public AudioClip magHitClip;    
 
     public override void Play(GunBase gun)
     {
@@ -41,7 +46,7 @@ public class normalReload : reloadAnimation
         Sequence seq = DOTween.Sequence();
 
         seq.Append(gun.gunTiltModel.transform.DOLocalRotate(tiltAngle, tiltTime));
-        seq.Join(gun.MoveArm.transform.DOLocalMove(handMagazinePoint, tiltTime));
+        seq.Join(gun.MoveArm.transform.DOLocalMove(ArmMagazinePoint, tiltTime));
         seq.Join(gun.MoveTekubi.transform.DOLocalRotate(counterTekubiRot, tiltTime));
 
         bool isTrackingMagazine = false;

@@ -5,43 +5,43 @@ using DG.Tweening;
 public class DualRevolver : reloadAnimation
 {
     [Header("基準となる時間（1.0倍の時）")]
-    public float baseTiltTime = 0.4f;
-    public float baseEjectTime = 0.4f;
-    public float baseHandOverTime = 0.3f;
-    public float baseGrabLoaderTime = 0.3f;
-    public float baseInsertTime1 = 0.5f;
-    public float baseInsertTime2 = 0.5f;
-    public float baseCloseTime = 0.4f;
+    [Tooltip("銃を傾ける時間")] public float baseTiltTime = 0.4f;
+    [Tooltip("排莢の傾き時間")] public float baseEjectTime = 0.4f;
+    [Tooltip("左銃を預ける時間")] public float baseHandOverTime = 0.3f;
+    [Tooltip("スピードローダーを取る時間")] public float baseGrabLoaderTime = 0.3f;
+    [Tooltip("左シリンダー装填時間")] public float baseInsertTime1 = 0.5f;
+    [Tooltip("右シリンダー装填時間")] public float baseInsertTime2 = 0.5f;
+    [Tooltip("シリンダーを閉じる時間")] public float baseCloseTime = 0.4f;
 
     [Header("アニメーションパラメータ")]
-    public Vector3 reloadTiltAngle = new Vector3(15, -10, 0);
-    public Vector3 ejectTiltAngle = new Vector3(-30, 0, 0);
+    [Tooltip("リロード時の傾き角度")] public Vector3 reloadTiltAngle = new Vector3(15, -10, 0);
+    [Tooltip("排莢時の傾き角度")] public Vector3 ejectTiltAngle = new Vector3(-30, 0, 0);
     
     [Header("シリンダー設定 (SpecialPartsのインデックス)")]
-    public int leftCylinderIndex = 0;
-    public int rightCylinderIndex = 1;
-    public Vector3 cylinderOpenPosition = new Vector3(0, 0, 0);
+    [Tooltip("左シリンダーのSpecialPartsインデックス")] public int leftCylinderIndex = 0;
+    [Tooltip("右シリンダーのSpecialPartsインデックス")] public int rightCylinderIndex = 1;
+    [Tooltip("シリンダーオープン位置")] public Vector3 cylinderOpenPosition = new Vector3(0, 0, 0);
 
     [Header("左銃の預け先設定 (SpecialPartsのインデックス)")]
-    public int leftGunIndex = 2;
-    public Vector3 handOverLeftGunPos = new Vector3(0.1f, -0.05f, 0.1f);
-    public Vector3 handOverLeftGunRot = new Vector3(10, 20, -10);
+    [Tooltip("左銃のSpecialPartsインデックス")] public int leftGunIndex = 2;
+    [Tooltip("預け時の左銃の位置")] public Vector3 handOverLeftGunPos = new Vector3(0.1f, -0.05f, 0.1f);
+    [Tooltip("預け時の左銃の回転")] public Vector3 handOverLeftGunRot = new Vector3(10, 20, -10);
 
     [Header("マガジン/スピードローダー設定")]
-    public Vector3 speedloaderSpawnPoint;
-    public Vector3 leftCylinderReloadPoint;
-    public Vector3 rightCylinderReloadPoint;
+    [Tooltip("スピードローダーの出現位置")] public Vector3 speedloaderSpawnPoint;
+    [Tooltip("左シリンダー装填位置")] public Vector3 leftCylinderReloadPoint;
+    [Tooltip("右シリンダー装填位置")] public Vector3 rightCylinderReloadPoint;
     
     [Header("手・手首の設定")]
-    public Vector3 leftInsertHandAngle = new Vector3(0, 30, 0);
-    public Vector3 rightInsertHandAngle = new Vector3(0, -30, 0);
+    [Tooltip("左シリンダー装填時の手の角度")] public Vector3 leftInsertHandAngle = new Vector3(0, 30, 0);
+    [Tooltip("右シリンダー装填時の手の角度")] public Vector3 rightInsertHandAngle = new Vector3(0, -30, 0);
 
-    [Header("効果音")]
-    public AudioClip cylinderOpenClip;
-    public AudioClip shellEjectClip;
-    public AudioClip speedloaderInsertClip;
-    public AudioClip cylinderCloseClip;
-    public AudioClip grabLoaderClip;
+    [Header("効果音設定")]
+    [Tooltip("シリンダー開放音")] public AudioClip cylinderOpenClip;
+    [Tooltip("排莢音")] public AudioClip shellEjectClip;
+    [Tooltip("スピードローダー装填音")] public AudioClip speedloaderInsertClip;
+    [Tooltip("シリンダー閉鎖音")] public AudioClip cylinderCloseClip;
+    [Tooltip("ローダー把持音")] public AudioClip grabLoaderClip;
 
     public override void Play(GunBase gun)
     {

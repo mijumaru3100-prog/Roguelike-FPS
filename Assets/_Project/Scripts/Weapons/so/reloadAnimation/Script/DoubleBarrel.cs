@@ -5,28 +5,30 @@ using DG.Tweening;
 public class DoubleBarrel : reloadAnimation
 {
     [Header("基準となる時間（1.0倍の時）")]
-    public float baseOpenTime = 0.5f;
-    public float baseDropTime = 0.4f;
-    public float baseInsertTime = 0.5f;
-    public float baseDropToInsertTime = 0.1f; 
-    public float baseBoltMoveTime = 0.5f;
+    [Tooltip("銃身を開く時間")] public float baseOpenTime = 0.5f;
+    [Tooltip("薬莢/マガジンを落とす時間")] public float baseDropTime = 0.4f;
+    [Tooltip("マガジンを挿入する時間")] public float baseInsertTime = 0.5f;
+    [Tooltip("落下から挿入開始までの待ち時間")] public float baseDropToInsertTime = 0.1f; 
 
     [Header("リロードモーション設定")]
-    public Vector3 OpenAngle;
-    public Vector3 dropDistance;
-    public Vector3 spawnPoint; 
-    public float shakeStrength;
+    [Tooltip("開閉時の傾き角度")] public Vector3 OpenAngle;
+    [Tooltip("薬莢の落下先位置")] public Vector3 dropDistance;
+    [Tooltip("新弾丸の出現位置")] public Vector3 spawnPoint; 
+    [Tooltip("シェイク強度")] public float shakeStrength;
 
-    public Vector3 handMagazinePoint;
+    [Tooltip("リロード時の腕の位置")]
+    [UnityEngine.Serialization.FormerlySerializedAs("handMagazinePoint")]
+    public Vector3 ArmMagazinePoint;
+
+    [Tooltip("リロード時の手首の回転補正")]
     public Vector3 tekubiHandMagazineRotation;
 
-     public Vector3 ReloadTekubiRot;
-
-    public AudioClip magOpenClip; 
-     public AudioClip magDropClip;    
-    public AudioClip magInsertClip;         
-    public AudioClip magCloseClip; 
-    public float CloseSoundDelay = 0.1f;
+    [Header("効果音設定")]
+    [Tooltip("銃身を開く音")] public AudioClip magOpenClip; 
+    [Tooltip("排莢/落下音")] public AudioClip magDropClip;    
+    [Tooltip("弾丸装填音")] public AudioClip magInsertClip;         
+    [Tooltip("銃身を閉じる音")] public AudioClip magCloseClip; 
+    [Tooltip("閉じる音の遅延時間")] public float CloseSoundDelay = 0.1f;
    
     public override void Play(GunBase gun)
     {
@@ -61,7 +63,7 @@ public class DoubleBarrel : reloadAnimation
         });
 
         seq.Append(gun.magazineObject.transform.DOLocalMove(defaultMagazinePoint,dropToInsertTime));
-        seq.Join(gun.MoveArm.transform.DOLocalMove(handMagazinePoint,dropToInsertTime));
+        seq.Join(gun.MoveArm.transform.DOLocalMove(ArmMagazinePoint,dropToInsertTime));
 
         seq.AppendCallback(() => {
             gun.StartReloadCountAnimation(OpenTime);

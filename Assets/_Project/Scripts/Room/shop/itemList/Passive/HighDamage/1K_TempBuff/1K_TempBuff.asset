@@ -20,6 +20,6 @@ MonoBehaviour:
   canStack: 0
   usecount: 0
   remainCount: 0
-  running: 1
+  running: 0
   buffDuration: 1.5
   buffStats: {fileID: 11400000, guid: 3d602cf21611646289bd373aa2e48d5d, type: 2}

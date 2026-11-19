@@ -28,9 +28,7 @@ public class StatsShop : MonoBehaviour
 
         [Header("Balance")]
         public float buffValue;
-        public float debuffValue;
         public int buffPrice;
-        public int debuffPrice;
     }
 
     [Header("Setup")]
@@ -51,7 +49,6 @@ public class StatsShop : MonoBehaviour
     [Header("UI")]
     public TextMeshPro priceText;
     public TextMeshPro BuffText;
-    public TextMeshPro DebuffText;
     public GameObject PlayerBuyText;
     public TextMeshProUGUI buyTextData;
 
@@ -62,17 +59,24 @@ public class StatsShop : MonoBehaviour
     private bool canBuy = true;
 
     private StatData currentBuff;
-    private StatData currentDebuff;
+
+    void Awake()
+    {
+        // Initialize SellStats here so it's ready before any other Start() calls ShopSetting()
+        if (baseStats != null)
+        {
+            SellStats = Instantiate(baseStats);
+        }
+    }
 
     void Start()
     {
-        PlayerBuyText = manager.PlayerBuyText;
-        buyTextData = manager.buyTextData;
         if (manager == null)
         {
             manager = FindObjectOfType<PlayerManager>();
         }
-        SellStats = Instantiate(baseStats);
+        PlayerBuyText = manager.PlayerBuyText;
+        buyTextData = manager.buyTextData;
 
         ShopSetting();
     }
@@ -91,20 +95,13 @@ public class StatsShop : MonoBehaviour
         SellStats.ResetToDefault(); 
 
         float buffRangeRate = Random.Range(buffMinRange, buffMaxRange);
-        float debuffRangeRate = Random.Range(buffMinRange, buffMaxRange);
-
         buffRangeRate = Mathf.Round(buffRangeRate * 10f) / 10f;
-        debuffRangeRate = Mathf.Round(debuffRangeRate * 10f) / 10f;
 
         SelectRandomStats();
 
         ApplyBuff(currentBuff, buffRangeRate);
-        ApplyDebuff(currentDebuff, debuffRangeRate);
 
-        int buffPrice = GetBuffPrice(currentBuff, buffRangeRate);
-        int debuffPrice = GetDebuffPrice(currentDebuff, debuffRangeRate);
-
-        price = Mathf.Max(0, buffPrice - debuffPrice);
+        price = GetBuffPrice(currentBuff, buffRangeRate);
 
         UpdateUI();
     }
@@ -114,26 +111,11 @@ public class StatsShop : MonoBehaviour
         if (statDatas.Count == 0) return;
 
         currentBuff = statDatas[Random.Range(0, statDatas.Count)];
-        currentDebuff = statDatas[Random.Range(0, statDatas.Count)];
-
-        if (statDatas.Count > 1)
-        {
-            while (currentBuff.type == currentDebuff.type)
-            {
-                currentDebuff = statDatas[Random.Range(0, statDatas.Count)];
-            }
-        }
     }
 
     void ApplyBuff(StatData stat, float rangeRate)
     {
         float value = CalculateBuff(stat.type, stat.buffValue, rangeRate);
-        SetStatValue(stat.type, value);
-    }
-
-    void ApplyDebuff(StatData stat, float rangeRate)
-    {
-        float value = CalculateDebuff(stat.type, stat.debuffValue, rangeRate);
         SetStatValue(stat.type, value);
     }
 
@@ -148,18 +130,6 @@ public class StatsShop : MonoBehaviour
             return Mathf.Round(baseValue * rate * 100f) / 100f;
         }
     }
-
-    float CalculateDebuff(StatsType type, float baseValue, float rate)
-{
-    if (IsFlatStat(type))
-    {
-        return Mathf.Round(-baseValue * rate * 100f) / 100f;
-    }
-    else
-    {
-        return -Mathf.Round(baseValue * rate * 100f) / 100f;
-    }
-}
 
     bool IsFlatStat(StatsType type)
     {
@@ -244,28 +214,21 @@ public class StatsShop : MonoBehaviour
     {
         return Mathf.RoundToInt(stat.buffPrice * rangeRate);
     }
-    int GetDebuffPrice(StatData stat, float rangeRate)
-    {
-        return Mathf.RoundToInt(stat.debuffPrice * rangeRate);
-    }
 
-void UpdateUI()
+    void UpdateUI()
     {
         if (priceText != null) priceText.text = canBuy ? price.ToString() : "SoldOut";
 
+        if (currentBuff == null) return;
+
         float buffVal = GetStatValue(currentBuff.type);
-        float debuffVal = GetStatValue(currentDebuff.type);
-
-        float absDebuff = Mathf.Abs(debuffVal);
-
         float displayBuff = IsFlatStat(currentBuff.type) ? buffVal : buffVal * 100f;
-        float displayDebuff = IsFlatStat(currentDebuff.type) ? absDebuff : absDebuff * 100f;
-
         string buffUnit = IsFlatStat(currentBuff.type) ? "" : "%";
-        string debuffUnit = IsFlatStat(currentDebuff.type) ? "" : "%";
 
-        BuffText.text = $"{currentBuff.displayName} +{displayBuff}{buffUnit}";
-        DebuffText.text = $"{currentDebuff.displayName} -{displayDebuff}{debuffUnit}";
+        if (BuffText != null)
+        {
+            BuffText.text = $"{currentBuff.displayName} +{displayBuff}{buffUnit}";
+        }
 
         UpdateBuyText();
     }

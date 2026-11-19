@@ -8,50 +8,91 @@ using Random = UnityEngine.Random;
 
 public class GunBase : MonoBehaviour
 {
+    [Header("基本性能")]
     public int baseMaxAmmo = 30;
-    public virtual int maxAmmo => Mathf.RoundToInt(Mathf.Max(1,(baseMaxAmmo + stats.bonusMaxAmmo) * (1+stats.maxAmmoMultiple)));
+    public virtual int maxAmmo
+{
+    get
+    {
+        if(AI!=null) return baseMaxAmmo;
+
+        float ammoBonus = stats.bonusMaxAmmo;
+        float ammoMultiple = stats.maxAmmoMultiple;
+
+
+        return Mathf.RoundToInt(
+            Mathf.Max(
+                1,
+                (baseMaxAmmo + ammoBonus) * (1 + ammoMultiple)
+            )
+        );
+    }
+}
     public void RefreshMaxAmmoUI()
     {
-        if (isNPC) return;
+        if (AI != null) return;
 
         if (ammoBeltUI != null)
         {
             ammoBeltUI.InitializeAmmoBelt(currentAmmo, maxAmmo,uiBulletSprite,uiWeaponSprite);
         }
     }
-    protected int _currentAmmo;
-
+    [SerializeField]protected int _currentAmmo;
     public int currentAmmo => _currentAmmo;
+
     public float defaultRPM = 450;
     public virtual float fireRate
+{
+    get
     {
-        get
+        if(AI!=null) return (60f / defaultRPM);
+
+        float totalMult = stats.fireRateMultiple;
+
+        if (pManager != null)
         {
-            float totalMult = stats.fireRateMultiple;
-            if (pManager != null)
+            foreach (var p in pManager.activePassives.ToArray())
             {
-                foreach (var p in pManager.activePassives.ToArray()) totalMult += p.GetFireRateMultiplier(pManager);
+                totalMult += p.GetFireRateMultiplier(pManager);
             }
-            totalMult = Mathf.Max(0.01f, totalMult);
-            return ((60f / defaultRPM) / (1+totalMult));
         }
+
+        totalMult = Mathf.Max(0.01f, totalMult);
+
+        return (60f / defaultRPM) / (1 + totalMult);
     }
+}
     
     public int baseDamage = 1;
     public int damage
+{
+    get
     {
-        get
-        {
-            float totalMult = stats.damageMultiple;
-            if (pManager != null)
-            {
-                foreach (var p in pManager.activePassives.ToArray()) totalMult += p.GetDamageMultiplier(pManager);
-            }
-            return Mathf.Max(1,Mathf.RoundToInt((baseDamage + stats.bonusDamage) * (1+totalMult)));
-        }
-    }
+        if(AI!=null) return baseDamage;
 
-    [Header("カメラ反動")]
+        float bonusDamage = stats.bonusDamage;
+        float totalMult = stats.damageMultiple;
+
+        if (pManager != null)
+        {
+            foreach (var p in pManager.activePassives.ToArray())
+            {
+                totalMult += p.GetDamageMultiplier(pManager);
+            }
+        }
+
+        return Mathf.Max(
+            1,
+            Mathf.RoundToInt(
+                (baseDamage + bonusDamage) * (1 + totalMult)
+            )
+        );
+    }
+}
+
+    public float knockbackForce = 5f;
+
+    [Header(" カメラ反動 ")]
     public float recoilForce = 0.25f; 
     public float ADSMagnification = 0.5f;
     public float horizontalRecoilForce = 0.1f;
@@ -62,30 +103,39 @@ public class GunBase : MonoBehaviour
     private float camCurrentY;
 
     public float GetTotalReloadSpeedMultiplier()
+{
+    float totalMult = stats.reloadSpeedMultiple;
+
+    if (pManager != null)
     {
-        float totalMult = stats.reloadSpeedMultiple;
-        if (pManager != null)
+        foreach (var p in pManager.activePassives.ToArray())
         {
-            foreach (var p in pManager.activePassives.ToArray()) 
             totalMult += p.GetReloadSpeedMultiplier(pManager);
         }
-        totalMult = 1 + Mathf.Max(0.01f, totalMult);
-        return totalMult;
     }
 
-    [Header("銃反動(見た目) ── 加算+Lerp方式")]
-    [Tooltip("後退量(z)、横ブレ(x)、上下(y)")]
-    public float kickBack  = 0.05f;
-    public float kickUp    = 0.05f;
+    totalMult = 1 + Mathf.Max(0.01f, totalMult);
+
+    return totalMult;
+}
+
+    [Header("射撃FOV演出")]
+public bool useShotFOV = true;
+public float shotFOVKick = 2.5f;
+public float shotFOVInDuration = 0.04f;
+public float shotFOVOutDuration = 0.15f;
+
+private Tween shotFOVTween;
+
+    [Header("銃の見た目反動 ")]
+    public float kickBack = 0.05f;
+    public float kickUp = 0.05f;
     public int maxRotX = 10;
-    public float kickSide  = 2.0f;
+    public float kickSide = 2.0f;
     public int maxRotY = 10;
-    [Tooltip("ADS時の銃リコイル倍率")]
-    public float gunRotation_adsMagnification = 0.8f;
-    [Tooltip("targetが0へ戻る速度")]
-    public float returnSpeed   = 8f;
-    [Tooltip("currentがtargetへ追従する速度")]
-    public float snapSpeed = 16f;
+     public float gunRotation_adsMagnification = 0.8f;
+    public float returnSpeed = 8f;
+     public float snapSpeed = 16f;
 
     private Vector3 gunTargetPos;
     private Vector3 gunCurrentPos;
@@ -94,141 +144,138 @@ public class GunBase : MonoBehaviour
 
     protected float lastFireTime;
 
-    [Header("設定")]
-    public PlayerManager pManager;
-    public Camera playerCamera;
-    public Transform adsPivot;
-    public Transform recoilPivot;
-    public CrosshairController crosshair;
+    [Header("ADS設定 ")]
+    public Vector3 adsPosition;
+    public Vector3 adsRotation;
+    public float adsSpeed = 0.1f;
+    public float adsFieldOfView = 40f;
+
+    [Header("配置・武器揺れ設定 ")]
+    public Vector3 offsetPosition;
+     public Vector3 offsetRotation;
+    public float bobbingAmount = 0.05f;
+    public float sideBobbingAmount = 0.03f;
+    public float BackwardOffset = 0.1f;
+    public float swayAmount = 1.5f;
     
-    [Header("銃パーツのアニメーションリスト")]
-    public List<GunPartSet> gunPartSets = new List<GunPartSet>();
 
     [Header("薬莢排出設定")]
     public bool useEject = false; 
     public enum EjectKind { Normal, ShotGun}
-    public EjectKind currentEject = EjectKind.Normal;
-    public Transform ejectPoint;
+     public EjectKind currentEject = EjectKind.Normal;
+     public Transform ejectPoint;
     public Vector2 ejectForceRange = new Vector2(3f, 5f);
-    public Vector2 ejectTorqueRange = new Vector2(10f, 20f);
 
-    [Header("UI弾丸画像設定")]
-    public Sprite uiWeaponSprite; 
-    public Sprite uiBulletSprite;
-
-    [Header("ヒート設定")]
-    public float currentHeat = 0f;
+    [Header("ヒート設定 ")]
     public float heatPerShot = 1f;
     public float coolDownRate = 4f;
 
-    [Header("UI設定")]
-    public TextMeshProUGUI ammoText; 
-    public AmmoBeltUI ammoBeltUI; 
+    [Header("マズルフラッシュ設定 ")]
+    [SerializeField] private bool useMuzzleFlashLight = true;
+    public Light muzzleFlashLight;
+    public float flashDuration = 0.05f;
+    public float maxIntensity = 15f;
+    public List<ParticleSystem> FlashParticles = new List<ParticleSystem>();
 
-    [Header("リロードのための武器パーツ")]
+    [Header("オーディオ設定")]
+    public SoundsPlayer ShotSound;
+    public List<AudioSource> shotAudioSources = new List<AudioSource>();
+    public AudioSource reloadAudioSource;
+    public AudioSource dryFireAudioSource;
+    public AudioSource kinKinAudioSource;
+    public AudioClip dryFireSound;
+
+    [Header("残弾演出設定")]
+    [SerializeField] private AudioClip kinKinSound;
+    public float changeStartThreshold = 0.3f;
+    public float maxPitchShift = 1.1f;
+    public float maxKinKinVolume = 0.8f;
+    public float kinKinDelay = 0.02f;
+    public float kinKinVolume = 1.0f;
+
+    [Header("武器パーツ参照")]
     public Transform gunTiltModel;
-    public Transform muzzlePoint;
+     public Transform muzzlePoint;
     public Transform magazinePoint;
     public GameObject magazineObject;
     public GameObject MoveArm;
-    public GameObject MoveShoulder;
     public GameObject MoveTekubi;
-    public List<GameObject>  SpecialParts =new List<GameObject>();
+    public List<GameObject> SpecialParts = new List<GameObject>();
+    public List<GunPartSet> gunPartSets = new List<GunPartSet>();
+
+    [Header("UI設定")]
+    public Sprite uiWeaponSprite; 
+    public Sprite uiBulletSprite;
 
     [Header("プラグイン")]
     public shotMode shotMode;
     public shotAction shotAction; 
     public reloadAnimation reloadAnimation; 
-    public PlayerStats stats;
+    [SerializeField] private ExtraSetting PlugInSetting;
 
-    [SerializeField]
-    private ExtraSetting PlugInSetting;
+    [Header("モディファイア")]
+    [SerializeField] private WeaponAbility _localAbility;
+    public WeaponAbility ability
+    {
+        get
+        {
+            if (pManager != null && pManager.currentAbility != null)
+                return pManager.currentAbility;
+            return _localAbility;
+        }
+        set
+        {
+            _localAbility = value;
+            if (pManager != null && value != null)
+            {
+                pManager.currentAbility = value;
+            }
+        }
+    }
+
     [Serializable]
     public class ExtraSetting
     {
-    public GameObject bulletPrefab;
-    public float DefaltReloadTime = 3f;
+        [Tooltip("デフォルトリロード時間")]
+        public float DefaltReloadTime = 3f;
     }
 
-    [Header("音設定 (個別音源用)")]
-    [Tooltip("射撃音用の音源。複数ある場合は交互に再生され、連射時の音途切れを防ぎます。")]
-    public List<AudioSource> shotAudioSources = new List<AudioSource>();
-    [Tooltip("リロード音（マガジン抜差、叩き込み、コッキング等）用の音源")]
-    public AudioSource reloadAudioSource;
-    [Tooltip("空撃ち（弾切れ）音用の音源")]
-    public AudioSource dryFireAudioSource;
-    [Tooltip("残弾減少時のキンキン金属音用の音源")]
-    public AudioSource kinKinAudioSource;
+    [Header("=== その他設定 ===")]
+    [Tooltip("NPCAI")] public NormalEnemyAI AI;
 
-    [Header("音設定")]
-    [SerializeField] private AudioClip[] ShotSounds;
-    
-    [SerializeField, Range(0, 2)] private float pitchRandomness = 0.1f;
-
-    [Header("----------空撃ち設定----------")]
-    public AudioClip dryFireSound;
-
-    [Header("----------残弾演出設定----------")]
-    [SerializeField] private AudioClip kinKinSound;
-
-    [Header("キンキン演出の調整（ミキサー）")]
-    [Range(0f, 1f)] 
-    public float changeStartThreshold = 0.3f;
-
-    [Range(0.5f, 2.0f)] 
-    public float maxPitchShift = 1.1f;
-
-    [Range(0f, 1f)] 
-    public float maxKinKinVolume = 0.8f;
-
-    [Range(0f, 0.05f)]
-    public float kinKinDelay = 0.02f;
-
-    [Header("マズルフラッシュ設定（ライト式）")]
-    public Light muzzleFlashLight;
-    public float flashDuration = 0.05f;
-    public float maxIntensity = 15f;
-
-    [Header("覗き込み（ADS）設定")]
-    public Vector3 adsPosition;
-    public float adsSpeed = 0.1f;
-    public float adsFieldOfView = 40f;
-    public Vector3 adsRotation;
-
-    [Header("銃取得時の配置設定")]
-    public Vector3 offsetPosition;
-    public Vector3 offsetRotation;
-
-    [Header("Bobbing")]
-    public float bobbingAmount = 0.05f;
-    public float sideBobbingAmount = 0.03f;
-    public float BackwardOffset = 0.1f;
-    public float swayAmount = 1.5f;
+    // --- 実行時・外部注入変数（インスペクタ非表示） ---
+     public PlayerManager pManager;
+    [HideInInspector] public Camera playerCamera;
+    [HideInInspector] public Transform adsPivot;
+    [HideInInspector] public Transform recoilPivot;
+    [HideInInspector] public CrosshairController crosshair;
+    [HideInInspector] public TextMeshProUGUI ammoText; 
+    [HideInInspector] public AmmoBeltUI ammoBeltUI; 
+    [HideInInspector] public PlayerStats stats;
+    [HideInInspector] public bool isAiming = false;
+    [HideInInspector] public bool isReloading = false;
+    [HideInInspector] public float currentHeat = 0f;
 
     private Vector3 defaultGunPosition;
     private Vector3 defaultGunRotation;
     private float defaultFOV;
-    public bool isAiming = false;
-    public bool isReloading = false;
-
-    public bool isNPC = false;
-    [SerializeField]private bool useMuzzleFlashLight = true;
     
     protected virtual void Start()
     {
-        if(isNPC)
+        if(AI != null)
         {
             if (pManager == null)
             {
-                pManager = GameObject.FindObjectOfType<PlayerManager>();
+                pManager = AI.pManager;
             }
             return;
         }
 
         isReloading = false;
-        if(!isNPC)
+        _currentAmmo = maxAmmo;
+        if(AI == null)
         {
-            _currentAmmo = maxAmmo;
+
             crosshair = pManager.crosshair;
         
         defaultGunPosition = adsPivot.localPosition;
@@ -248,7 +295,7 @@ public class GunBase : MonoBehaviour
             if (ml != null) ml.useDirectRecoil = true;
         }
 
-        if (ammoBeltUI != null && isNPC == false)
+        if (ammoBeltUI != null && AI != null == false)
         {
             ammoBeltUI.InitializeAmmoBelt(currentAmmo, maxAmmo,uiBulletSprite,uiWeaponSprite);
         }
@@ -261,29 +308,34 @@ public class GunBase : MonoBehaviour
     }
 
     void Update()
+{
+    if (AI != null) return;
+
+    if (pManager == null) return;
+    if (pManager.IsTitle) return;
+    if (Time.timeScale == 0) return;
+
+    if (shotMode != null && shotMode.IsFiring())
     {
-        if (Time.timeScale == 0) return;
-
-        if(isNPC){return;}
-
-        if (shotMode != null && shotMode.IsFiring())
-        {
-           tryFire();
-        }
-        
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            StartCoroutine(tryReload());
-        }
-
-        HandleADS();
-        UpdateRecoil();
-
-        if (currentHeat > 0) 
-        {
-            currentHeat = Mathf.Max(0, currentHeat - coolDownRate * Time.deltaTime);
-        }
+        tryFire();
     }
+
+    if (Input.GetKeyDown(KeyCode.R))
+    {
+        StartCoroutine(tryReload());
+    }
+
+    HandleADS();
+    UpdateRecoil();
+
+    if (currentHeat > 0)
+    {
+        currentHeat = Mathf.Max(
+            0,
+            currentHeat - coolDownRate * Time.deltaTime
+        );
+    }
+}
 
     public void tryFire()
     {
@@ -315,9 +367,19 @@ public class GunBase : MonoBehaviour
         fire();
     }
 
+    public IEnumerator AllFire()
+{
+    while (!isReloading)
+    {
+        tryFire();
+
+        yield return new WaitForSeconds(fireRate);
+    }
+}
+
     protected virtual void fire()
     {
-       if(isNPC == false)
+       if(AI == null)
         {
             foreach (var p in pManager.activePassives.ToArray())
             {
@@ -325,27 +387,31 @@ public class GunBase : MonoBehaviour
             }
         }
         
-        if (shotAction == null && isNPC == false) 
+        if (shotAction == null) 
         {
             Debug.Log("shotactionが未設定...だ、よ。ままならないね...");
-            return;
         }
 
         _currentAmmo --;
         lastFireTime = Time.time;
 
-        if(isNPC == false)
+        if(AI == null)
         {
             UpdateAmmoDisplay();
             ApplyGunRecoil();
+            ApplyShotFOV();
         }
+        
 
-        shotAction.shot(this);
+        //多くのmodifierではshotAction.shot(this);となる
+        if(ability != null && AI ==null) ability.SpecialShot(this);
+        else shotAction.shot(this);
+
         currentHeat += heatPerShot;
         PlayShotSound();
         PlayMuzzleFlash();
         
-        if(!isNPC)
+        if(AI == null)
         {
             foreach (var set in gunPartSets)
             {
@@ -364,6 +430,7 @@ public class GunBase : MonoBehaviour
             {
                 p.OnShotComplete(pManager);
             }
+
         }
 
         if(useEject) EjectShell();
@@ -371,7 +438,7 @@ public class GunBase : MonoBehaviour
     
     private void UpdateRecoil()
     {
-        if (isNPC) return;
+        if (AI != null) return;
 
         if (recoilPivot != null)
         {
@@ -398,7 +465,7 @@ public class GunBase : MonoBehaviour
 
     public void ApplyGunRecoil()
     {
-        if (recoilPivot == null || isNPC) return;
+        if (recoilPivot == null || AI != null) return;
 
         float adsScale = isAiming ? gunRotation_adsMagnification : 1f;
         float side = Random.Range(-kickSide, kickSide) * adsScale;
@@ -415,7 +482,7 @@ public class GunBase : MonoBehaviour
 
     public void ApplyCameraRecoil()
     {
-        if (isNPC) return;
+        if (AI != null) return;
 
         float fX = recoilForce;
         float fY = horizontalRecoilForce;
@@ -427,43 +494,28 @@ public class GunBase : MonoBehaviour
         camTargetX -= fX;
         camTargetY += Random.Range(-fY, fY);
     }
+
+    private void ApplyShotFOV()
+{
+    if (AI != null || !useShotFOV || playerCamera == null)
+        return;
+
+    shotFOVTween?.Kill();
+
+    float baseFOV = isAiming ? adsFieldOfView : defaultFOV;
+    float targetFOV = baseFOV + shotFOVKick;
+
+    playerCamera.fieldOfView = targetFOV;
+
+    shotFOVTween = playerCamera
+        .DOFieldOfView(baseFOV, shotFOVOutDuration)
+        .SetEase(Ease.OutQuad);
+}
     
     private int currentIndex = 0;
     public void PlayShotSound()
     {
-        if (ShotSounds == null || ShotSounds.Length == 0) return;
-
-        AudioSource source = null;
-        if (shotAudioSources != null && shotAudioSources.Count > 0)
-        {
-            source = shotAudioSources[currentIndex];
-            currentIndex = (currentIndex + 1) % shotAudioSources.Count;
-        }
-        else
-        {
-            source = GetComponent<AudioSource>();
-        }
-
-        if (source == null) return;
-
-        AudioClip clipToPlay = ShotSounds[Random.Range(0, ShotSounds.Length)];
-
-        float ammoRatio = (float)currentAmmo / maxAmmo;
-        float dynamicPitch = 1.0f;
-        float kinKinVolume = 0f;
-
-        if (ammoRatio < changeStartThreshold)
-        {
-            float effectProgress = 1.0f - (ammoRatio / changeStartThreshold);
-            dynamicPitch = Mathf.Lerp(1.0f, maxPitchShift, effectProgress);
-            kinKinVolume = effectProgress * maxKinKinVolume;
-        }
-
-        source.clip = clipToPlay;
-        
-        source.pitch = (1.0f + Random.Range(-pitchRandomness, pitchRandomness)) * dynamicPitch;
-        
-        source.Play();
+        ShotSound.PlaySound(this);
 
         if (kinKinVolume > 0 && kinKinSound != null)
         {
@@ -537,6 +589,11 @@ public class GunBase : MonoBehaviour
         muzzleFlashLight.enabled = true;
         muzzleFlashLight.intensity = maxIntensity;
 
+        foreach(var p in FlashParticles)
+        {
+            p.Play();
+        }
+
         StartCoroutine(ExtinguishFlash());
     }
 
@@ -552,7 +609,8 @@ public class GunBase : MonoBehaviour
 
    void HandleADS()
    {
-        if(isNPC){return;}
+
+        if(AI != null){return;}
 
         if(isReloading)
         {
@@ -609,7 +667,7 @@ public class GunBase : MonoBehaviour
         
         isReloading = true;
         
-        if(!isNPC && reloadAnimation)
+        if(AI == null && reloadAnimation)
         {
            foreach (var p in pManager.activePassives.ToArray())
            {
@@ -619,6 +677,7 @@ public class GunBase : MonoBehaviour
         }
         else
         {
+            AI.attackCoroutine = null;
             yield return new WaitForSeconds(PlugInSetting.DefaltReloadTime);
             OnReloadComplete();
         }
@@ -633,7 +692,7 @@ public class GunBase : MonoBehaviour
     public void OnReloadComplete()
     {
         
-        if (!isNPC)
+        if (AI == null)
         {
             _currentAmmo = maxAmmo;
             UpdateAmmoDisplay();
@@ -644,13 +703,15 @@ public class GunBase : MonoBehaviour
         }
         isReloading = false;
         
-        if (pManager != null && pManager.activePassives!= null && !isNPC)
+        if (pManager != null && pManager.activePassives!= null && AI == null)
         {
             foreach (var p in pManager.activePassives.ToArray())
             {
                 p.OnReloadComplete(pManager);
             }
         }
+
+        if(ability != null && AI == null) ability.OnCompleteReload();
     }
 
    private Coroutine ammoChangeCoroutine;
@@ -719,7 +780,7 @@ public void AddAmmoAnimated(int amountToAdd, float duration)
 
 public void UpdateAmmoDisplay()
 {
-if(isNPC){return;}
+if(AI != null){return;}
 
 if (ammoText != null)
 {
