@@ -15,7 +15,7 @@ Unity / C# で開発している3DローグライクFPSです。
 
 ## プレイ動画
 
-https://github.com/user-attachments/assets/8a208a3b-0d16-4dfa-88cf-823121a04c62
+https://github.com/user-attachments/assets/afb3ac82-094e-42f4-af17-2dd535c44d22
 
 https://github.com/user-attachments/assets/d1766d56-2a39-4851-b84a-db42ab4f4575
 
